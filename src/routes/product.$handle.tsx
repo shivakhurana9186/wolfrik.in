@@ -1,9 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+import { ProductGrid } from "@/components/ProductGrid";
 import { Button } from "@/components/ui/button";
-import { Loader2, ChevronLeft } from "lucide-react";
-import { PRODUCT_BY_HANDLE_QUERY, storefrontApiRequest, type ShopifyProduct } from "@/lib/shopify";
+import { Loader2, ChevronLeft, Ruler, Truck, RotateCcw } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  PRODUCT_BY_HANDLE_QUERY,
+  storefrontApiRequest,
+  type ShopifyProduct,
+} from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
 import { useCartSync } from "@/hooks/useCartSync";
 
@@ -18,11 +31,14 @@ function ProductPage() {
   const { handle } = Route.useParams();
   const [product, setProduct] = useState<ProductNode | null | undefined>(undefined);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
+  const [activeImage, setActiveImage] = useState(0);
+  const [zoom, setZoom] = useState({ on: false, x: 50, y: 50 });
   const addItem = useCartStore((s) => s.addItem);
   const isLoading = useCartStore((s) => s.isLoading);
 
   useEffect(() => {
     let active = true;
+    setActiveImage(0);
     storefrontApiRequest(PRODUCT_BY_HANDLE_QUERY, { handle })
       .then((data) => {
         if (!active) return;
@@ -36,7 +52,9 @@ function ProductPage() {
     };
   }, [handle]);
 
-  const variant = product?.variants.edges.find((v) => v.node.id === selectedVariantId)?.node;
+  const variant = product?.variants.edges.find(
+    (v) => v.node.id === selectedVariantId
+  )?.node;
 
   const handleAdd = async () => {
     if (!product || !variant) return;
@@ -51,15 +69,15 @@ function ProductPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground">
       <Header />
-      <div className="mx-auto max-w-7xl px-6 py-10">
+      <div className="mx-auto max-w-7xl px-6 py-8">
         <Link
-          to="/"
-          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+          to="/shop"
+          className="inline-flex items-center text-xs uppercase tracking-[0.22em] text-muted-foreground hover:text-accent"
         >
-          <ChevronLeft className="h-4 w-4 mr-1" />
-          Back
+          <ChevronLeft className="h-3 w-3 mr-1" />
+          Back to shop
         </Link>
 
         {product === undefined ? (
@@ -71,76 +89,220 @@ function ProductPage() {
             <p className="font-serif text-2xl">Product not found</p>
           </div>
         ) : (
-          <div className="mt-8 grid md:grid-cols-2 gap-12">
-            <div className="space-y-4">
-              {product.images.edges.length > 0 ? (
-                product.images.edges.map((img, i) => (
-                  <div key={i} className="aspect-[3/4] overflow-hidden bg-muted">
+          <>
+            <div className="mt-8 grid md:grid-cols-2 gap-12">
+              {/* Gallery */}
+              <div>
+                <div
+                  className="relative aspect-[3/4] overflow-hidden bg-muted cursor-zoom-in"
+                  onMouseEnter={() => setZoom((z) => ({ ...z, on: true }))}
+                  onMouseLeave={() => setZoom((z) => ({ ...z, on: false }))}
+                  onMouseMove={(e) => {
+                    const r = e.currentTarget.getBoundingClientRect();
+                    setZoom({
+                      on: true,
+                      x: ((e.clientX - r.left) / r.width) * 100,
+                      y: ((e.clientY - r.top) / r.height) * 100,
+                    });
+                  }}
+                >
+                  {product.images.edges[activeImage] ? (
                     <img
-                      src={img.node.url}
-                      alt={img.node.altText || product.title}
-                      className="h-full w-full object-cover"
+                      src={product.images.edges[activeImage].node.url}
+                      alt={
+                        product.images.edges[activeImage].node.altText ||
+                        product.title
+                      }
+                      className="h-full w-full object-cover transition-transform duration-300"
+                      style={
+                        zoom.on
+                          ? {
+                              transform: "scale(1.8)",
+                              transformOrigin: `${zoom.x}% ${zoom.y}%`,
+                            }
+                          : undefined
+                      }
                     />
-                  </div>
-                ))
-              ) : (
-                <div className="aspect-[3/4] bg-muted" />
-              )}
-            </div>
-
-            <div className="md:sticky md:top-24 md:self-start">
-              <h1 className="font-serif text-4xl md:text-5xl tracking-tight">{product.title}</h1>
-              <p className="mt-4 text-lg">
-                {product.priceRange.minVariantPrice.currencyCode}{" "}
-                {parseFloat(product.priceRange.minVariantPrice.amount).toFixed(2)}
-              </p>
-
-              <p className="mt-8 text-muted-foreground leading-relaxed whitespace-pre-line">
-                {product.description}
-              </p>
-
-              {product.variants.edges.length > 1 && (
-                <div className="mt-10">
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-3">
-                    Options
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {product.variants.edges.map((v) => (
+                  ) : (
+                    <div className="h-full w-full bg-muted" />
+                  )}
+                </div>
+                {product.images.edges.length > 1 && (
+                  <div className="mt-3 grid grid-cols-5 gap-3">
+                    {product.images.edges.map((img, i) => (
                       <button
-                        key={v.node.id}
-                        onClick={() => setSelectedVariantId(v.node.id)}
-                        disabled={!v.node.availableForSale}
-                        className={`px-4 py-2 border text-sm transition-colors ${
-                          selectedVariantId === v.node.id
-                            ? "border-foreground bg-foreground text-background"
-                            : "border-border hover:border-foreground"
-                        } disabled:opacity-40 disabled:cursor-not-allowed`}
+                        key={i}
+                        onClick={() => setActiveImage(i)}
+                        className={`aspect-square overflow-hidden border-2 transition-colors ${
+                          i === activeImage ? "border-accent" : "border-transparent"
+                        }`}
                       >
-                        {v.node.title}
+                        <img
+                          src={img.node.url}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
                       </button>
                     ))}
                   </div>
-                </div>
-              )}
-
-              <Button
-                onClick={handleAdd}
-                disabled={isLoading || !variant?.availableForSale}
-                size="lg"
-                className="w-full mt-10"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : variant?.availableForSale ? (
-                  "Add to bag"
-                ) : (
-                  "Sold out"
                 )}
-              </Button>
+              </div>
+
+              {/* Details */}
+              <div className="md:sticky md:top-24 md:self-start">
+                <p className="text-[10px] uppercase tracking-[0.35em] text-accent">
+                  {product.productType || "WOLFRIK CO."}
+                </p>
+                <h1 className="mt-3 font-serif text-4xl md:text-5xl tracking-tight">
+                  {product.title}
+                </h1>
+                <p className="mt-4 text-lg">
+                  {product.priceRange.minVariantPrice.currencyCode}{" "}
+                  {parseFloat(product.priceRange.minVariantPrice.amount).toFixed(2)}
+                </p>
+
+                {product.variants.edges.length > 1 && (
+                  <div className="mt-10">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                        Size
+                      </p>
+                      <Dialog>
+                        <DialogTrigger className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-accent">
+                          <Ruler className="h-3 w-3" /> Size guide
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle className="font-serif text-2xl">
+                              Size Guide
+                            </DialogTitle>
+                          </DialogHeader>
+                          <SizeGuide />
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {product.variants.edges.map((v) => (
+                        <button
+                          key={v.node.id}
+                          onClick={() => setSelectedVariantId(v.node.id)}
+                          disabled={!v.node.availableForSale}
+                          className={`min-w-[3rem] px-4 py-2.5 border text-xs uppercase tracking-[0.18em] transition-colors ${
+                            selectedVariantId === v.node.id
+                              ? "border-accent bg-accent text-accent-foreground"
+                              : "border-border hover:border-accent"
+                          } disabled:opacity-30 disabled:line-through disabled:cursor-not-allowed`}
+                        >
+                          {v.node.title}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <Button
+                  onClick={handleAdd}
+                  disabled={isLoading || !variant?.availableForSale}
+                  size="lg"
+                  className="w-full mt-8 rounded-none uppercase tracking-[0.22em] text-xs"
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : variant?.availableForSale ? (
+                    "Add to bag"
+                  ) : (
+                    "Sold out"
+                  )}
+                </Button>
+
+                {product.description && (
+                  <div className="mt-10 border-t border-border pt-8">
+                    <p className="text-[10px] uppercase tracking-[0.22em] text-accent">
+                      Details
+                    </p>
+                    <p className="mt-4 text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                      {product.description}
+                    </p>
+                  </div>
+                )}
+
+                <div className="mt-8 space-y-3 text-xs text-muted-foreground">
+                  <p className="flex items-center gap-3">
+                    <Truck className="h-3.5 w-3.5 text-accent" />
+                    Free shipping on orders over $200
+                  </p>
+                  <p className="flex items-center gap-3">
+                    <RotateCcw className="h-3.5 w-3.5 text-accent" />
+                    Free returns within 30 days
+                  </p>
+                </div>
+
+                {/* Reviews — empty state, no fabricated content */}
+                <div className="mt-10 border-t border-border pt-8">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-accent">
+                    Reviews
+                  </p>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    No reviews yet. Be the first to share your experience.
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
+
+            {/* Related */}
+            <section className="mt-32">
+              <p className="text-[10px] uppercase tracking-[0.35em] text-accent">
+                Pair with
+              </p>
+              <h2 className="mt-3 font-serif text-3xl md:text-4xl tracking-tight">
+                You might also like
+              </h2>
+              <div className="mt-10">
+                <ProductGrid limit={4} />
+              </div>
+            </section>
+          </>
         )}
       </div>
+      <Footer />
+    </div>
+  );
+}
+
+function SizeGuide() {
+  const rows = [
+    { size: "XS", chest: "34–36", waist: "27–29", hip: "35–37" },
+    { size: "S", chest: "36–38", waist: "29–31", hip: "37–39" },
+    { size: "M", chest: "38–40", waist: "31–33", hip: "39–41" },
+    { size: "L", chest: "40–42", waist: "33–35", hip: "41–43" },
+    { size: "XL", chest: "42–44", waist: "35–37", hip: "43–45" },
+  ];
+  return (
+    <div className="mt-4">
+      <p className="text-sm text-muted-foreground mb-4">
+        Measurements in inches. For the best fit, measure across the fullest part of
+        your chest, the narrowest part of your waist, and the widest part of your hips.
+      </p>
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-border text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            <th className="py-3 text-left">Size</th>
+            <th className="py-3 text-left">Chest</th>
+            <th className="py-3 text-left">Waist</th>
+            <th className="py-3 text-left">Hip</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.size} className="border-b border-border/50">
+              <td className="py-3 font-serif">{r.size}</td>
+              <td className="py-3">{r.chest}</td>
+              <td className="py-3">{r.waist}</td>
+              <td className="py-3">{r.hip}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
