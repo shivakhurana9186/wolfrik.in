@@ -1,27 +1,24 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import heroImg from "@/assets/hero.jpg";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import wolfHero from "@/assets/wolf-hero.jpg";
 import { Header } from "@/components/Header";
-import { ProductCard } from "@/components/ProductCard";
+import { Footer } from "@/components/Footer";
+import { ProductGrid } from "@/components/ProductGrid";
 import { Button } from "@/components/ui/button";
-import { PRODUCTS_QUERY, storefrontApiRequest, type ShopifyProduct } from "@/lib/shopify";
 import { useCartSync } from "@/hooks/useCartSync";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Maison Ovum — Considered Everyday Clothing" },
+      { title: "WOLFRIK CO. — Wild by Nature. Refined by Choice." },
       {
         name: "description",
         content:
-          "Quietly elegant wardrobe essentials cut from natural fibres. Shop the latest collection from Maison Ovum.",
+          "Dark luxury streetwear. Shop the Wolfrik Alpha (men) and Wolfrik Luna (women) collections.",
       },
-      { property: "og:title", content: "Maison Ovum — Considered Everyday Clothing" },
-      {
-        property: "og:description",
-        content:
-          "Quietly elegant wardrobe essentials cut from natural fibres. Shop the latest collection.",
-      },
+      { property: "og:title", content: "WOLFRIK CO." },
+      { property: "og:description", content: "Wild by Nature. Refined by Choice." },
+      { property: "og:image", content: wolfHero },
+      { property: "twitter:image", content: wolfHero },
     ],
   }),
   component: Index,
@@ -29,126 +26,146 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   useCartSync();
-  const [products, setProducts] = useState<ShopifyProduct[] | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    storefrontApiRequest(PRODUCTS_QUERY, { first: 24, query: null })
-      .then((data) => {
-        if (!active) return;
-        setProducts(data?.data?.products?.edges ?? []);
-      })
-      .catch((e) => {
-        console.error(e);
-        if (active) setProducts([]);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
 
       {/* Hero */}
-      <section className="relative">
-        <div className="grid md:grid-cols-2 min-h-[80vh]">
-          <div className="flex items-center px-6 md:px-16 py-16 md:py-24 order-2 md:order-1">
-            <div className="max-w-md">
-              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                Autumn / Winter
-              </p>
-              <h1 className="mt-6 font-serif text-5xl md:text-6xl leading-[1.05] tracking-tight">
-                A wardrobe, quietly considered.
-              </h1>
-              <p className="mt-6 text-base text-muted-foreground leading-relaxed">
-                Pieces designed in small batches from natural fibres — meant to be worn often,
-                kept long, and loved well.
-              </p>
-              <div className="mt-10 flex gap-4">
-                <Button asChild size="lg">
-                  <a href="#shop">Shop the collection</a>
-                </Button>
-                <Button asChild size="lg" variant="ghost">
-                  <a href="#about">Our story</a>
-                </Button>
-              </div>
+      <section className="relative h-[88vh] min-h-[600px] overflow-hidden">
+        <img
+          src={wolfHero}
+          alt="A wolf with amber eyes in deep shadow — the spirit of WOLFRIK"
+          width={1920}
+          height={1280}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-background/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-background/40" />
+
+        <div className="relative z-10 mx-auto flex h-full max-w-7xl items-center px-6">
+          <div className="max-w-xl">
+            <p className="text-[10px] uppercase tracking-[0.4em] text-accent">
+              Autumn / Winter — Collection 01
+            </p>
+            <h1 className="mt-6 font-serif text-5xl md:text-7xl lg:text-8xl leading-[0.95] tracking-tight">
+              Wild by Nature.
+              <br />
+              <span className="italic text-accent">Refined</span> by Choice.
+            </h1>
+            <p className="mt-8 max-w-md text-base text-muted-foreground leading-relaxed">
+              Dark, considered streetwear for those who walk apart from the pack.
+              Built in small batches. Made to outlast trends.
+            </p>
+            <div className="mt-10 flex flex-wrap gap-3">
+              <Button asChild size="lg" className="rounded-none uppercase tracking-[0.22em] text-xs">
+                <Link to="/men">Shop Alpha</Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="rounded-none border-foreground/40 uppercase tracking-[0.22em] text-xs hover:bg-foreground hover:text-background"
+              >
+                <Link to="/women">Shop Luna</Link>
+              </Button>
             </div>
           </div>
-          <div className="order-1 md:order-2 relative overflow-hidden">
-            <img
-              src={heroImg}
-              alt="Two models wearing minimalist neutral clothing against a warm plaster wall"
-              width={1600}
-              height={1024}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          </div>
         </div>
       </section>
 
-      {/* Products */}
-      <section id="shop" className="mx-auto max-w-7xl px-6 py-24">
-        <div className="flex items-end justify-between mb-12">
+      {/* Collection split */}
+      <section className="mx-auto max-w-7xl px-6 py-24">
+        <div className="grid gap-6 md:grid-cols-2">
+          {[
+            {
+              to: "/men" as const,
+              label: "Wolfrik Alpha",
+              tag: "Men",
+              copy: "Tees, hoodies, joggers, outerwear.",
+            },
+            {
+              to: "/women" as const,
+              label: "Wolfrik Luna",
+              tag: "Women",
+              copy: "Tops, dresses, leggings, layers.",
+            },
+          ].map((c) => (
+            <Link
+              key={c.to}
+              to={c.to}
+              className="group relative block aspect-[5/4] overflow-hidden border border-border/60"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-secondary to-background transition-opacity duration-700 group-hover:opacity-80" />
+              <div className="relative z-10 flex h-full flex-col justify-end p-8 md:p-12">
+                <p className="text-[10px] uppercase tracking-[0.35em] text-accent">{c.tag}</p>
+                <h3 className="mt-3 font-serif text-4xl md:text-5xl tracking-tight">
+                  {c.label}
+                </h3>
+                <p className="mt-3 text-sm text-muted-foreground">{c.copy}</p>
+                <span className="mt-6 inline-flex w-fit border-b border-foreground pb-1 text-[11px] uppercase tracking-[0.22em] transition-colors group-hover:border-accent group-hover:text-accent">
+                  Explore →
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Bestsellers */}
+      <section className="mx-auto max-w-7xl px-6 pb-24">
+        <div className="mb-12 flex items-end justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-              The collection
-            </p>
+            <p className="text-[10px] uppercase tracking-[0.35em] text-accent">The Pack</p>
             <h2 className="mt-3 font-serif text-4xl md:text-5xl tracking-tight">
-              New arrivals
+              Bestsellers
             </h2>
           </div>
+          <Link
+            to="/shop"
+            className="hidden md:inline-flex border-b border-foreground pb-1 text-[11px] uppercase tracking-[0.22em] hover:text-accent hover:border-accent transition-colors"
+          >
+            Shop all →
+          </Link>
         </div>
+        <ProductGrid limit={8} />
+      </section>
 
-        {products === null ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i}>
-                <div className="aspect-[3/4] bg-muted animate-pulse" />
-                <div className="mt-4 h-4 w-2/3 bg-muted animate-pulse" />
-                <div className="mt-2 h-3 w-1/3 bg-muted animate-pulse" />
-              </div>
-            ))}
-          </div>
-        ) : products.length === 0 ? (
-          <div className="border border-dashed border-border py-24 text-center">
-            <p className="font-serif text-2xl">No products found</p>
-            <p className="mt-3 text-sm text-muted-foreground max-w-md mx-auto">
-              Tell the chat what you want to sell — name, price, and a short description —
-              and it will appear here.
+      {/* Brand story */}
+      <section className="border-y border-border/60 bg-secondary/40">
+        <div className="mx-auto grid max-w-7xl gap-12 px-6 py-24 md:grid-cols-2 md:items-center">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.35em] text-accent">The House</p>
+            <h2 className="mt-4 font-serif text-4xl md:text-5xl leading-[1.05] tracking-tight">
+              Born from the wild.
+              <br />
+              <span className="italic">Built for the bold.</span>
+            </h2>
+            <p className="mt-6 max-w-lg text-muted-foreground leading-relaxed">
+              WOLFRIK CO. is for those who move with intent. Every piece is cut in small
+              runs from premium fabrics, finished with quiet gold detail, and made to
+              wear hard for years — not seasons.
             </p>
+            <Link
+              to="/about"
+              className="mt-8 inline-flex border-b border-foreground pb-1 text-[11px] uppercase tracking-[0.22em] hover:text-accent hover:border-accent transition-colors"
+            >
+              Read our story →
+            </Link>
           </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
-            {products.map((p) => (
-              <ProductCard key={p.node.id} product={p} />
-            ))}
+          <div className="relative aspect-[4/5] overflow-hidden">
+            <img
+              src={wolfHero}
+              alt="WOLFRIK brand portrait"
+              loading="lazy"
+              className="h-full w-full object-cover grayscale opacity-90"
+            />
+            <div className="absolute inset-0 ring-1 ring-inset ring-accent/20" />
           </div>
-        )}
-      </section>
-
-      {/* About */}
-      <section id="about" className="border-t border-border/60 bg-secondary/40">
-        <div className="mx-auto max-w-3xl px-6 py-24 text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">About</p>
-          <h2 className="mt-4 font-serif text-3xl md:text-4xl leading-snug">
-            Slow, intentional, and made to last.
-          </h2>
-          <p className="mt-6 text-muted-foreground leading-relaxed">
-            We work with a small atelier in Porto, choosing organic cottons, washed linens and
-            responsibly sourced wool. Every garment is cut to a generous, timeless silhouette —
-            the kind you reach for, season after season.
-          </p>
         </div>
       </section>
 
-      <footer className="border-t border-border/60">
-        <div className="mx-auto max-w-7xl px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p className="font-serif text-lg text-foreground">Maison Ovum</p>
-          <p>© {new Date().getFullYear()} Maison Ovum. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
