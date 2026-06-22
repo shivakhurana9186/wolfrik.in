@@ -151,7 +151,7 @@ function ProductPage() {
               {/* Details */}
               <div className="md:sticky md:top-24 md:self-start">
                 <p className="text-[10px] uppercase tracking-[0.35em] text-accent">
-                  {product.productType || "WOLFRIK CO."}
+                  WOLFRIK CO.
                 </p>
                 <h1 className="mt-3 font-serif text-4xl md:text-5xl tracking-tight">
                   {product.title}
