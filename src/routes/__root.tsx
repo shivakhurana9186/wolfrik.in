@@ -91,10 +91,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "WOLFRIK CO. — Wild by Nature. Refined by Choice." },
       { name: "description", content: "Dark luxury streetwear from WOLFRIK CO. Shop the Alpha (men) and Luna (women) collections." },
-      { property: "og:title", content: "WOLFRIK CO." },
-      { property: "og:description", content: "Wild by Nature. Refined by Choice." },
+      { property: "og:title", content: "WOLFRIK CO. — Wild by Nature. Refined by Choice." },
+      { property: "og:description", content: "Dark luxury streetwear from WOLFRIK CO. Shop the Alpha (men) and Luna (women) collections." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "WOLFRIK CO. — Wild by Nature. Refined by Choice." },
+      { name: "twitter:description", content: "Dark luxury streetwear from WOLFRIK CO. Shop the Alpha (men) and Luna (women) collections." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0d2cee8f-89c3-41f4-83ce-0c93c42cce72/id-preview-043a741d--8cf227e8-d63f-4211-9f8e-601d0bc79ea8.lovable.app-1782203193041.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0d2cee8f-89c3-41f4-83ce-0c93c42cce72/id-preview-043a741d--8cf227e8-d63f-4211-9f8e-601d0bc79ea8.lovable.app-1782203193041.png" },
     ],
     links: [
       {
