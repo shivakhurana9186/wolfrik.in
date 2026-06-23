@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
+import { useCurrency } from "@/lib/currency";
 import type { ShopifyProduct } from "@/lib/shopify";
 
 // Deterministic badge based on product id so the same product always gets the same badge
@@ -18,6 +19,7 @@ function badgeFor(id: string): { label: string; tone: "gold" | "blood" | "white"
 export function ProductCard({ product }: { product: ShopifyProduct }) {
   const addItem = useCartStore((s) => s.addItem);
   const isLoading = useCartStore((s) => s.isLoading);
+  const { format } = useCurrency();
 
   const node = product.node;
   const image = node.images.edges[0]?.node;
@@ -84,7 +86,7 @@ export function ProductCard({ product }: { product: ShopifyProduct }) {
         <div>
           <h3 className="font-serif text-base leading-tight tracking-tight">{node.title}</h3>
           <p className="mt-1 text-xs uppercase tracking-[0.18em] text-muted-foreground">
-            {price.currencyCode} {parseFloat(price.amount).toFixed(2)}
+            {format(price.amount)}
           </p>
         </div>
       </div>

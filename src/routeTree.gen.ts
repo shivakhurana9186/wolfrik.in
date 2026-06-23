@@ -12,10 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WomenRouteImport } from './routes/women'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as MenRouteImport } from './routes/men'
+import { Route as JournalRouteImport } from './routes/journal'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
+import { Route as JournalSlugRouteImport } from './routes/journal.$slug'
 
 const WomenRoute = WomenRouteImport.update({
   id: '/women',
@@ -30,6 +32,11 @@ const ShopRoute = ShopRouteImport.update({
 const MenRoute = MenRouteImport.update({
   id: '/men',
   path: '/men',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JournalRoute = JournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -52,23 +59,32 @@ const ProductHandleRoute = ProductHandleRouteImport.update({
   path: '/product/$handle',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JournalSlugRoute = JournalSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => JournalRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/journal': typeof JournalRouteWithChildren
   '/men': typeof MenRoute
   '/shop': typeof ShopRoute
   '/women': typeof WomenRoute
+  '/journal/$slug': typeof JournalSlugRoute
   '/product/$handle': typeof ProductHandleRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/journal': typeof JournalRouteWithChildren
   '/men': typeof MenRoute
   '/shop': typeof ShopRoute
   '/women': typeof WomenRoute
+  '/journal/$slug': typeof JournalSlugRoute
   '/product/$handle': typeof ProductHandleRoute
 }
 export interface FileRoutesById {
@@ -76,9 +92,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/journal': typeof JournalRouteWithChildren
   '/men': typeof MenRoute
   '/shop': typeof ShopRoute
   '/women': typeof WomenRoute
+  '/journal/$slug': typeof JournalSlugRoute
   '/product/$handle': typeof ProductHandleRoute
 }
 export interface FileRouteTypes {
@@ -87,27 +105,33 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/journal'
     | '/men'
     | '/shop'
     | '/women'
+    | '/journal/$slug'
     | '/product/$handle'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/contact'
+    | '/journal'
     | '/men'
     | '/shop'
     | '/women'
+    | '/journal/$slug'
     | '/product/$handle'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/contact'
+    | '/journal'
     | '/men'
     | '/shop'
     | '/women'
+    | '/journal/$slug'
     | '/product/$handle'
   fileRoutesById: FileRoutesById
 }
@@ -115,6 +139,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
+  JournalRoute: typeof JournalRouteWithChildren
   MenRoute: typeof MenRoute
   ShopRoute: typeof ShopRoute
   WomenRoute: typeof WomenRoute
@@ -142,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/men'
       fullPath: '/men'
       preLoaderRoute: typeof MenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/journal': {
+      id: '/journal'
+      path: '/journal'
+      fullPath: '/journal'
+      preLoaderRoute: typeof JournalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -172,13 +204,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductHandleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/journal/$slug': {
+      id: '/journal/$slug'
+      path: '/$slug'
+      fullPath: '/journal/$slug'
+      preLoaderRoute: typeof JournalSlugRouteImport
+      parentRoute: typeof JournalRoute
+    }
   }
 }
+
+interface JournalRouteChildren {
+  JournalSlugRoute: typeof JournalSlugRoute
+}
+
+const JournalRouteChildren: JournalRouteChildren = {
+  JournalSlugRoute: JournalSlugRoute,
+}
+
+const JournalRouteWithChildren =
+  JournalRoute._addFileChildren(JournalRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
+  JournalRoute: JournalRouteWithChildren,
   MenRoute: MenRoute,
   ShopRoute: ShopRoute,
   WomenRoute: WomenRoute,
