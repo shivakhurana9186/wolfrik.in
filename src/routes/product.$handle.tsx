@@ -17,6 +17,7 @@ import {
   storefrontApiRequest,
   type ShopifyProduct,
 } from "@/lib/shopify";
+import { useCurrency } from "@/lib/currency";
 import { useCartStore } from "@/stores/cartStore";
 import { useCartSync } from "@/hooks/useCartSync";
 
@@ -35,6 +36,7 @@ function ProductPage() {
   const [zoom, setZoom] = useState({ on: false, x: 50, y: 50 });
   const addItem = useCartStore((s) => s.addItem);
   const isLoading = useCartStore((s) => s.isLoading);
+  const { format } = useCurrency();
 
   useEffect(() => {
     let active = true;
@@ -157,8 +159,7 @@ function ProductPage() {
                   {product.title}
                 </h1>
                 <p className="mt-4 text-lg">
-                  {product.priceRange.minVariantPrice.currencyCode}{" "}
-                  {parseFloat(product.priceRange.minVariantPrice.amount).toFixed(2)}
+                  {format(product.priceRange.minVariantPrice.amount)}
                 </p>
 
                 {product.variants.edges.length > 1 && (

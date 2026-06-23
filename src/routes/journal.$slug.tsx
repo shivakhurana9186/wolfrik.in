@@ -64,7 +64,7 @@ function JournalPost() {
         </p>
 
         <div className="mt-12 space-y-6 text-base md:text-lg leading-relaxed text-foreground/90">
-          {post.content.map((para, i) => (
+          {post.content.map((para: string, i: number) => (
             <p key={i}>{para}</p>
           ))}
         </div>

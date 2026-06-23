@@ -21,6 +21,8 @@ import "@fontsource/inter/600.css";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "../components/ui/sonner";
+import { CurrencyProvider } from "../lib/currency";
+import { CookieBanner } from "../components/CookieBanner";
 
 function NotFoundComponent() {
   return (
@@ -126,8 +128,11 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
-      <Toaster position="top-center" />
+      <CurrencyProvider>
+        <Outlet />
+        <CookieBanner />
+        <Toaster position="top-center" />
+      </CurrencyProvider>
     </QueryClientProvider>
   );
 }

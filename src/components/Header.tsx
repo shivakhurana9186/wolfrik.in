@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { CartDrawer } from "@/components/CartDrawer";
+import { CurrencySwitcher } from "@/components/CurrencySwitcher";
 
 export function Header() {
   const [open, setOpen] = useState(false);
@@ -10,6 +11,7 @@ export function Header() {
     { to: "/men", label: "Alpha" },
     { to: "/women", label: "Luna" },
     { to: "/shop", label: "Shop All" },
+    { to: "/journal", label: "Journal" },
     { to: "/about", label: "About" },
     { to: "/contact", label: "Contact" },
   ] as const;
@@ -43,7 +45,12 @@ export function Header() {
           ))}
         </nav>
 
-        <CartDrawer />
+        <div className="flex items-center gap-4">
+          <div className="hidden md:block">
+            <CurrencySwitcher />
+          </div>
+          <CartDrawer />
+        </div>
       </div>
 
       {open && (

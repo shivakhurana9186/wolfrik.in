@@ -46,6 +46,7 @@ export function Footer() {
           <p className="text-[11px] uppercase tracking-[0.22em] text-accent">House</p>
           <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
             <li><Link to="/about" className="hover:text-foreground">About</Link></li>
+            <li><Link to="/journal" className="hover:text-foreground">Journal</Link></li>
             <li><Link to="/contact" className="hover:text-foreground">Contact</Link></li>
             <li>
               <a
