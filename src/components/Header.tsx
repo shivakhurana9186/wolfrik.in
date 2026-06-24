@@ -79,3 +79,48 @@ export function Header() {
     </header>
   );
 }
+
+function AuthButton() {
+  const { user } = useAuth();
+  const [busy, setBusy] = useState(false);
+
+  if (!user) {
+    return (
+      <Link
+        to="/"
+        className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground hover:text-accent transition-colors"
+      >
+        Sign In
+      </Link>
+    );
+  }
+
+  const initial = (user.email ?? user.phone ?? "U").charAt(0).toUpperCase();
+
+  const signOut = async () => {
+    setBusy(true);
+    const { error } = await supabase.auth.signOut();
+    setBusy(false);
+    if (error) toast.error(error.message);
+    else toast.success("Signed out");
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className="hidden sm:flex h-8 w-8 items-center justify-center border border-accent/40 text-[11px] font-medium text-accent" title={user.email ?? user.phone ?? ""}>
+        {initial}
+      </div>
+      <button
+        type="button"
+        onClick={signOut}
+        disabled={busy}
+        className="text-muted-foreground hover:text-accent transition-colors"
+        aria-label="Sign out"
+      >
+        <LogOut className="h-4 w-4" />
+      </button>
+      <UserIcon className="sr-only" />
+    </div>
+  );
+}
+
