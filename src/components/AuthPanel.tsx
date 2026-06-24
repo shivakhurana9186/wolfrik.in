@@ -117,9 +117,11 @@ export function AuthPanel({ onAuthed }: { onAuthed?: () => void }) {
     }
   };
 
+  const fullPhone = `${dialCode}${phone.replace(/\D/g, "")}`;
+
   const sendOtp = async () => {
     try {
-      phoneSchema.parse(phone);
+      localPhoneSchema.parse(phone.replace(/\D/g, ""));
     } catch (err) {
       if (err instanceof z.ZodError) {
         toast.error(err.issues[0].message);
@@ -128,7 +130,7 @@ export function AuthPanel({ onAuthed }: { onAuthed?: () => void }) {
     }
     setBusy(true);
     try {
-      const { error } = await supabase.auth.signInWithOtp({ phone });
+      const { error } = await supabase.auth.signInWithOtp({ phone: fullPhone });
       if (error) throw error;
       setOtpSent(true);
       toast.success("Code sent. Check your messages.");
