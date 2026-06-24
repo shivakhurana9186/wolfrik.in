@@ -7,6 +7,58 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const COUNTRY_CODES: { code: string; dial: string; label: string }[] = [
+  { code: "US", dial: "+1", label: "United States (+1)" },
+  { code: "CA", dial: "+1", label: "Canada (+1)" },
+  { code: "GB", dial: "+44", label: "United Kingdom (+44)" },
+  { code: "IN", dial: "+91", label: "India (+91)" },
+  { code: "AU", dial: "+61", label: "Australia (+61)" },
+  { code: "DE", dial: "+49", label: "Germany (+49)" },
+  { code: "FR", dial: "+33", label: "France (+33)" },
+  { code: "IT", dial: "+39", label: "Italy (+39)" },
+  { code: "ES", dial: "+34", label: "Spain (+34)" },
+  { code: "NL", dial: "+31", label: "Netherlands (+31)" },
+  { code: "SE", dial: "+46", label: "Sweden (+46)" },
+  { code: "NO", dial: "+47", label: "Norway (+47)" },
+  { code: "DK", dial: "+45", label: "Denmark (+45)" },
+  { code: "IE", dial: "+353", label: "Ireland (+353)" },
+  { code: "CH", dial: "+41", label: "Switzerland (+41)" },
+  { code: "AT", dial: "+43", label: "Austria (+43)" },
+  { code: "BE", dial: "+32", label: "Belgium (+32)" },
+  { code: "PT", dial: "+351", label: "Portugal (+351)" },
+  { code: "PL", dial: "+48", label: "Poland (+48)" },
+  { code: "MX", dial: "+52", label: "Mexico (+52)" },
+  { code: "BR", dial: "+55", label: "Brazil (+55)" },
+  { code: "AR", dial: "+54", label: "Argentina (+54)" },
+  { code: "JP", dial: "+81", label: "Japan (+81)" },
+  { code: "KR", dial: "+82", label: "South Korea (+82)" },
+  { code: "CN", dial: "+86", label: "China (+86)" },
+  { code: "HK", dial: "+852", label: "Hong Kong (+852)" },
+  { code: "SG", dial: "+65", label: "Singapore (+65)" },
+  { code: "MY", dial: "+60", label: "Malaysia (+60)" },
+  { code: "TH", dial: "+66", label: "Thailand (+66)" },
+  { code: "ID", dial: "+62", label: "Indonesia (+62)" },
+  { code: "PH", dial: "+63", label: "Philippines (+63)" },
+  { code: "VN", dial: "+84", label: "Vietnam (+84)" },
+  { code: "PK", dial: "+92", label: "Pakistan (+92)" },
+  { code: "BD", dial: "+880", label: "Bangladesh (+880)" },
+  { code: "LK", dial: "+94", label: "Sri Lanka (+94)" },
+  { code: "AE", dial: "+971", label: "UAE (+971)" },
+  { code: "SA", dial: "+966", label: "Saudi Arabia (+966)" },
+  { code: "QA", dial: "+974", label: "Qatar (+974)" },
+  { code: "KW", dial: "+965", label: "Kuwait (+965)" },
+  { code: "IL", dial: "+972", label: "Israel (+972)" },
+  { code: "TR", dial: "+90", label: "Türkiye (+90)" },
+  { code: "EG", dial: "+20", label: "Egypt (+20)" },
+  { code: "ZA", dial: "+27", label: "South Africa (+27)" },
+  { code: "NG", dial: "+234", label: "Nigeria (+234)" },
+  { code: "KE", dial: "+254", label: "Kenya (+254)" },
+  { code: "NZ", dial: "+64", label: "New Zealand (+64)" },
+  { code: "RU", dial: "+7", label: "Russia (+7)" },
+  { code: "UA", dial: "+380", label: "Ukraine (+380)" },
+];
 
 const emailSchema = z.string().trim().email("Enter a valid email").max(255);
 const passwordSchema = z.string().min(8, "Min 8 characters").max(72);
