@@ -7,13 +7,65 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const COUNTRY_CODES: { code: string; dial: string; label: string }[] = [
+  { code: "US", dial: "+1", label: "United States (+1)" },
+  { code: "CA", dial: "+1", label: "Canada (+1)" },
+  { code: "GB", dial: "+44", label: "United Kingdom (+44)" },
+  { code: "IN", dial: "+91", label: "India (+91)" },
+  { code: "AU", dial: "+61", label: "Australia (+61)" },
+  { code: "DE", dial: "+49", label: "Germany (+49)" },
+  { code: "FR", dial: "+33", label: "France (+33)" },
+  { code: "IT", dial: "+39", label: "Italy (+39)" },
+  { code: "ES", dial: "+34", label: "Spain (+34)" },
+  { code: "NL", dial: "+31", label: "Netherlands (+31)" },
+  { code: "SE", dial: "+46", label: "Sweden (+46)" },
+  { code: "NO", dial: "+47", label: "Norway (+47)" },
+  { code: "DK", dial: "+45", label: "Denmark (+45)" },
+  { code: "IE", dial: "+353", label: "Ireland (+353)" },
+  { code: "CH", dial: "+41", label: "Switzerland (+41)" },
+  { code: "AT", dial: "+43", label: "Austria (+43)" },
+  { code: "BE", dial: "+32", label: "Belgium (+32)" },
+  { code: "PT", dial: "+351", label: "Portugal (+351)" },
+  { code: "PL", dial: "+48", label: "Poland (+48)" },
+  { code: "MX", dial: "+52", label: "Mexico (+52)" },
+  { code: "BR", dial: "+55", label: "Brazil (+55)" },
+  { code: "AR", dial: "+54", label: "Argentina (+54)" },
+  { code: "JP", dial: "+81", label: "Japan (+81)" },
+  { code: "KR", dial: "+82", label: "South Korea (+82)" },
+  { code: "CN", dial: "+86", label: "China (+86)" },
+  { code: "HK", dial: "+852", label: "Hong Kong (+852)" },
+  { code: "SG", dial: "+65", label: "Singapore (+65)" },
+  { code: "MY", dial: "+60", label: "Malaysia (+60)" },
+  { code: "TH", dial: "+66", label: "Thailand (+66)" },
+  { code: "ID", dial: "+62", label: "Indonesia (+62)" },
+  { code: "PH", dial: "+63", label: "Philippines (+63)" },
+  { code: "VN", dial: "+84", label: "Vietnam (+84)" },
+  { code: "PK", dial: "+92", label: "Pakistan (+92)" },
+  { code: "BD", dial: "+880", label: "Bangladesh (+880)" },
+  { code: "LK", dial: "+94", label: "Sri Lanka (+94)" },
+  { code: "AE", dial: "+971", label: "UAE (+971)" },
+  { code: "SA", dial: "+966", label: "Saudi Arabia (+966)" },
+  { code: "QA", dial: "+974", label: "Qatar (+974)" },
+  { code: "KW", dial: "+965", label: "Kuwait (+965)" },
+  { code: "IL", dial: "+972", label: "Israel (+972)" },
+  { code: "TR", dial: "+90", label: "Türkiye (+90)" },
+  { code: "EG", dial: "+20", label: "Egypt (+20)" },
+  { code: "ZA", dial: "+27", label: "South Africa (+27)" },
+  { code: "NG", dial: "+234", label: "Nigeria (+234)" },
+  { code: "KE", dial: "+254", label: "Kenya (+254)" },
+  { code: "NZ", dial: "+64", label: "New Zealand (+64)" },
+  { code: "RU", dial: "+7", label: "Russia (+7)" },
+  { code: "UA", dial: "+380", label: "Ukraine (+380)" },
+];
 
 const emailSchema = z.string().trim().email("Enter a valid email").max(255);
 const passwordSchema = z.string().min(8, "Min 8 characters").max(72);
-const phoneSchema = z
+const localPhoneSchema = z
   .string()
   .trim()
-  .regex(/^\+[1-9]\d{6,14}$/, "Use international format, e.g. +14155550123");
+  .regex(/^[1-9]\d{5,14}$/, "Enter a valid phone number (digits only, no leading 0)");
 
 type Mode = "signin" | "signup";
 
@@ -23,6 +75,7 @@ export function AuthPanel({ onAuthed }: { onAuthed?: () => void }) {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [dialCode, setDialCode] = useState("+1");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -64,9 +117,11 @@ export function AuthPanel({ onAuthed }: { onAuthed?: () => void }) {
     }
   };
 
+  const fullPhone = `${dialCode}${phone.replace(/\D/g, "")}`;
+
   const sendOtp = async () => {
     try {
-      phoneSchema.parse(phone);
+      localPhoneSchema.parse(phone.replace(/\D/g, ""));
     } catch (err) {
       if (err instanceof z.ZodError) {
         toast.error(err.issues[0].message);
@@ -75,7 +130,7 @@ export function AuthPanel({ onAuthed }: { onAuthed?: () => void }) {
     }
     setBusy(true);
     try {
-      const { error } = await supabase.auth.signInWithOtp({ phone });
+      const { error } = await supabase.auth.signInWithOtp({ phone: fullPhone });
       if (error) throw error;
       setOtpSent(true);
       toast.success("Code sent. Check your messages.");
@@ -93,7 +148,7 @@ export function AuthPanel({ onAuthed }: { onAuthed?: () => void }) {
     }
     setBusy(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({ phone, token: otp, type: "sms" });
+      const { error } = await supabase.auth.verifyOtp({ phone: fullPhone, token: otp, type: "sms" });
       if (error) throw error;
       toast.success("Signed in.");
       onAuthed?.();
@@ -169,7 +224,19 @@ export function AuthPanel({ onAuthed }: { onAuthed?: () => void }) {
         <TabsContent value="phone" className="mt-6 space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="phone" className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Phone</Label>
-            <Input id="phone" type="tel" placeholder="+14155550123" value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-none border-border/60 bg-transparent h-11" disabled={otpSent} />
+            <div className="flex gap-2">
+              <Select value={`${dialCode}|${COUNTRY_CODES.find(c => c.dial === dialCode)?.code ?? ""}`} onValueChange={(v) => setDialCode(v.split("|")[0])} disabled={otpSent}>
+                <SelectTrigger className="w-[120px] rounded-none border-border/60 bg-transparent h-11">
+                  <SelectValue>{dialCode}</SelectValue>
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {COUNTRY_CODES.map((c) => (
+                    <SelectItem key={`${c.code}-${c.dial}`} value={`${c.dial}|${c.code}`}>{c.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input id="phone" type="tel" inputMode="tel" placeholder="4155550123" value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-none border-border/60 bg-transparent h-11 flex-1" disabled={otpSent} maxLength={15} />
+            </div>
           </div>
           {otpSent && (
             <div className="space-y-1.5">
