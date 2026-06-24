@@ -75,6 +75,7 @@ export function AuthPanel({ onAuthed }: { onAuthed?: () => void }) {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [dialCode, setDialCode] = useState("+1");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [busy, setBusy] = useState(false);
