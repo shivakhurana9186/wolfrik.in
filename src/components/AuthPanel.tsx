@@ -224,7 +224,19 @@ export function AuthPanel({ onAuthed }: { onAuthed?: () => void }) {
         <TabsContent value="phone" className="mt-6 space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="phone" className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Phone</Label>
-            <Input id="phone" type="tel" placeholder="+14155550123" value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-none border-border/60 bg-transparent h-11" disabled={otpSent} />
+            <div className="flex gap-2">
+              <Select value={`${dialCode}|${COUNTRY_CODES.find(c => c.dial === dialCode)?.code ?? ""}`} onValueChange={(v) => setDialCode(v.split("|")[0])} disabled={otpSent}>
+                <SelectTrigger className="w-[120px] rounded-none border-border/60 bg-transparent h-11">
+                  <SelectValue>{dialCode}</SelectValue>
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {COUNTRY_CODES.map((c) => (
+                    <SelectItem key={`${c.code}-${c.dial}`} value={`${c.dial}|${c.code}`}>{c.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input id="phone" type="tel" inputMode="tel" placeholder="4155550123" value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-none border-border/60 bg-transparent h-11 flex-1" disabled={otpSent} maxLength={15} />
+            </div>
           </div>
           {otpSent && (
             <div className="space-y-1.5">
