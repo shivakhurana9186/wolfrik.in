@@ -148,7 +148,7 @@ export function AuthPanel({ onAuthed }: { onAuthed?: () => void }) {
     }
     setBusy(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({ phone, token: otp, type: "sms" });
+      const { error } = await supabase.auth.verifyOtp({ phone: fullPhone, token: otp, type: "sms" });
       if (error) throw error;
       toast.success("Signed in.");
       onAuthed?.();
