@@ -62,10 +62,10 @@ const COUNTRY_CODES: { code: string; dial: string; label: string }[] = [
 
 const emailSchema = z.string().trim().email("Enter a valid email").max(255);
 const passwordSchema = z.string().min(8, "Min 8 characters").max(72);
-const phoneSchema = z
+const localPhoneSchema = z
   .string()
   .trim()
-  .regex(/^\+[1-9]\d{6,14}$/, "Use international format, e.g. +14155550123");
+  .regex(/^[1-9]\d{5,14}$/, "Enter a valid phone number (digits only, no leading 0)");
 
 type Mode = "signin" | "signup";
 
