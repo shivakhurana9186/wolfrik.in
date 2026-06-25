@@ -1,5 +1,7 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useRouter } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -8,9 +10,26 @@ export const Route = createFileRoute("/_authenticated")({
     if (error || !data.user) throw redirect({ to: "/" });
     return { user: data.user };
   },
-  component: () => <Outlet />,
+  component: AuthenticatedLayout,
   pendingComponent: AuthenticatedLoading,
 });
+
+function AuthenticatedLayout() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.navigate({ to: "/", replace: true });
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user) {
+    return <AuthenticatedLoading />;
+  }
+
+  return <Outlet />;
+}
 
 function AuthenticatedLoading() {
   return (
