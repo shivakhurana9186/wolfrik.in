@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import wolfHero from "@/assets/wolf-hero.jpg";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -25,6 +26,12 @@ function Landing() {
   useCartSync();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate({ to: "/shop" });
+    }
+  }, [user, loading, navigate]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
