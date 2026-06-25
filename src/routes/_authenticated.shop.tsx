@@ -4,7 +4,7 @@ import { Footer } from "@/components/Footer";
 import { ProductGrid } from "@/components/ProductGrid";
 import { useCartSync } from "@/hooks/useCartSync";
 
-export const Route = createFileRoute("/shop")({
+export const Route = createFileRoute("/_authenticated/shop")({
   head: () => ({
     meta: [
       { title: "Shop All — WOLFRIK CO." },

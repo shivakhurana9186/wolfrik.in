@@ -10,23 +10,19 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WomenRouteImport } from './routes/women'
-import { Route as ShopRouteImport } from './routes/shop'
 import { Route as MenRouteImport } from './routes/men'
 import { Route as JournalRouteImport } from './routes/journal'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as JournalSlugRouteImport } from './routes/journal.$slug'
+import { Route as AuthenticatedShopRouteImport } from './routes/_authenticated.shop'
 
 const WomenRoute = WomenRouteImport.update({
   id: '/women',
   path: '/women',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ShopRoute = ShopRouteImport.update({
-  id: '/shop',
-  path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MenRoute = MenRouteImport.update({
@@ -49,6 +45,10 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -64,6 +64,11 @@ const JournalSlugRoute = JournalSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => JournalRoute,
 } as any)
+const AuthenticatedShopRoute = AuthenticatedShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -71,8 +76,8 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/journal': typeof JournalRouteWithChildren
   '/men': typeof MenRoute
-  '/shop': typeof ShopRoute
   '/women': typeof WomenRoute
+  '/shop': typeof AuthenticatedShopRoute
   '/journal/$slug': typeof JournalSlugRoute
   '/product/$handle': typeof ProductHandleRoute
 }
@@ -82,20 +87,21 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/journal': typeof JournalRouteWithChildren
   '/men': typeof MenRoute
-  '/shop': typeof ShopRoute
   '/women': typeof WomenRoute
+  '/shop': typeof AuthenticatedShopRoute
   '/journal/$slug': typeof JournalSlugRoute
   '/product/$handle': typeof ProductHandleRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/journal': typeof JournalRouteWithChildren
   '/men': typeof MenRoute
-  '/shop': typeof ShopRoute
   '/women': typeof WomenRoute
+  '/_authenticated/shop': typeof AuthenticatedShopRoute
   '/journal/$slug': typeof JournalSlugRoute
   '/product/$handle': typeof ProductHandleRoute
 }
@@ -107,8 +113,8 @@ export interface FileRouteTypes {
     | '/contact'
     | '/journal'
     | '/men'
-    | '/shop'
     | '/women'
+    | '/shop'
     | '/journal/$slug'
     | '/product/$handle'
   fileRoutesByTo: FileRoutesByTo
@@ -118,30 +124,31 @@ export interface FileRouteTypes {
     | '/contact'
     | '/journal'
     | '/men'
-    | '/shop'
     | '/women'
+    | '/shop'
     | '/journal/$slug'
     | '/product/$handle'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/about'
     | '/contact'
     | '/journal'
     | '/men'
-    | '/shop'
     | '/women'
+    | '/_authenticated/shop'
     | '/journal/$slug'
     | '/product/$handle'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
   JournalRoute: typeof JournalRouteWithChildren
   MenRoute: typeof MenRoute
-  ShopRoute: typeof ShopRoute
   WomenRoute: typeof WomenRoute
   ProductHandleRoute: typeof ProductHandleRoute
 }
@@ -153,13 +160,6 @@ declare module '@tanstack/react-router' {
       path: '/women'
       fullPath: '/women'
       preLoaderRoute: typeof WomenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/shop': {
-      id: '/shop'
-      path: '/shop'
-      fullPath: '/shop'
-      preLoaderRoute: typeof ShopRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/men': {
@@ -190,6 +190,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -211,8 +218,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JournalSlugRouteImport
       parentRoute: typeof JournalRoute
     }
+    '/_authenticated/shop': {
+      id: '/_authenticated/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof AuthenticatedShopRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
+
+interface AuthenticatedRouteChildren {
+  AuthenticatedShopRoute: typeof AuthenticatedShopRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedShopRoute: AuthenticatedShopRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
 
 interface JournalRouteChildren {
   JournalSlugRoute: typeof JournalSlugRoute
@@ -227,11 +253,11 @@ const JournalRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
   JournalRoute: JournalRouteWithChildren,
   MenRoute: MenRoute,
-  ShopRoute: ShopRoute,
   WomenRoute: WomenRoute,
   ProductHandleRoute: ProductHandleRoute,
 }
