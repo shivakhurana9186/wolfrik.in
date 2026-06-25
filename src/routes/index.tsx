@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import wolfHero from "@/assets/wolf-hero.jpg";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
