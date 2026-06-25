@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WomenRouteImport } from './routes/women'
-import { Route as ShopRouteImport } from './routes/shop'
 import { Route as MenRouteImport } from './routes/men'
 import { Route as JournalRouteImport } from './routes/journal'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -22,11 +21,6 @@ import { Route as JournalSlugRouteImport } from './routes/journal.$slug'
 const WomenRoute = WomenRouteImport.update({
   id: '/women',
   path: '/women',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ShopRoute = ShopRouteImport.update({
-  id: '/shop',
-  path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MenRoute = MenRouteImport.update({
@@ -71,7 +65,6 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/journal': typeof JournalRouteWithChildren
   '/men': typeof MenRoute
-  '/shop': typeof ShopRoute
   '/women': typeof WomenRoute
   '/journal/$slug': typeof JournalSlugRoute
   '/product/$handle': typeof ProductHandleRoute
@@ -82,7 +75,6 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/journal': typeof JournalRouteWithChildren
   '/men': typeof MenRoute
-  '/shop': typeof ShopRoute
   '/women': typeof WomenRoute
   '/journal/$slug': typeof JournalSlugRoute
   '/product/$handle': typeof ProductHandleRoute
@@ -94,7 +86,6 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/journal': typeof JournalRouteWithChildren
   '/men': typeof MenRoute
-  '/shop': typeof ShopRoute
   '/women': typeof WomenRoute
   '/journal/$slug': typeof JournalSlugRoute
   '/product/$handle': typeof ProductHandleRoute
@@ -107,7 +98,6 @@ export interface FileRouteTypes {
     | '/contact'
     | '/journal'
     | '/men'
-    | '/shop'
     | '/women'
     | '/journal/$slug'
     | '/product/$handle'
@@ -118,7 +108,6 @@ export interface FileRouteTypes {
     | '/contact'
     | '/journal'
     | '/men'
-    | '/shop'
     | '/women'
     | '/journal/$slug'
     | '/product/$handle'
@@ -129,7 +118,6 @@ export interface FileRouteTypes {
     | '/contact'
     | '/journal'
     | '/men'
-    | '/shop'
     | '/women'
     | '/journal/$slug'
     | '/product/$handle'
@@ -141,7 +129,6 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   JournalRoute: typeof JournalRouteWithChildren
   MenRoute: typeof MenRoute
-  ShopRoute: typeof ShopRoute
   WomenRoute: typeof WomenRoute
   ProductHandleRoute: typeof ProductHandleRoute
 }
@@ -153,13 +140,6 @@ declare module '@tanstack/react-router' {
       path: '/women'
       fullPath: '/women'
       preLoaderRoute: typeof WomenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/shop': {
-      id: '/shop'
-      path: '/shop'
-      fullPath: '/shop'
-      preLoaderRoute: typeof ShopRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/men': {
@@ -231,20 +211,9 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   JournalRoute: JournalRouteWithChildren,
   MenRoute: MenRoute,
-  ShopRoute: ShopRoute,
   WomenRoute: WomenRoute,
   ProductHandleRoute: ProductHandleRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
