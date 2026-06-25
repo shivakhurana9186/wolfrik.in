@@ -27,6 +27,12 @@ function Landing() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!loading && user) {
+      navigate({ to: "/shop" });
+    }
+  }, [user, loading, navigate]);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
