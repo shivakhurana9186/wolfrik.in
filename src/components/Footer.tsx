@@ -58,7 +58,7 @@ export function Footer() {
           <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
             <li>
               <a
-                href="https://instagram.com"
+                href="https://instagram.com/wolfrik.fashion"
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 hover:text-foreground"
