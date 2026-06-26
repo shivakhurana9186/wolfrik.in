@@ -45,9 +45,17 @@ export function Footer() {
         <div>
           <p className="text-[11px] uppercase tracking-[0.22em] text-accent">House</p>
           <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/about" className="hover:text-foreground">About</Link></li>
-            <li><Link to="/journal" className="hover:text-foreground">Journal</Link></li>
+            <li><Link to="/about" className="hover:text-foreground">About Us</Link></li>
             <li><Link to="/contact" className="hover:text-foreground">Contact</Link></li>
+            <li><Link to="/contact" className="hover:text-foreground">FAQ</Link></li>
+            <li><Link to="/policies" className="hover:text-foreground">Policies</Link></li>
+            <li><Link to="/journal" className="hover:text-foreground">Journal</Link></li>
+          </ul>
+        </div>
+
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.22em] text-accent">Social</p>
+          <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
             <li>
               <a
                 href="https://instagram.com"
@@ -56,6 +64,16 @@ export function Footer() {
                 className="inline-flex items-center gap-2 hover:text-foreground"
               >
                 <Instagram className="h-3.5 w-3.5" /> Instagram
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://tiktok.com"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-foreground"
+              >
+                TikTok
               </a>
             </li>
           </ul>
