@@ -19,6 +19,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as JournalSlugRouteImport } from './routes/journal.$slug'
+import { Route as ApiTryonRouteImport } from './routes/api/tryon'
 import { Route as AuthenticatedShopRouteImport } from './routes/_authenticated.shop'
 
 const WomenRoute = WomenRouteImport.update({
@@ -70,6 +71,11 @@ const JournalSlugRoute = JournalSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => JournalRoute,
 } as any)
+const ApiTryonRoute = ApiTryonRouteImport.update({
+  id: '/api/tryon',
+  path: '/api/tryon',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedShopRoute = AuthenticatedShopRouteImport.update({
   id: '/shop',
   path: '/shop',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/policies': typeof PoliciesRoute
   '/women': typeof WomenRoute
   '/shop': typeof AuthenticatedShopRoute
+  '/api/tryon': typeof ApiTryonRoute
   '/journal/$slug': typeof JournalSlugRoute
   '/product/$handle': typeof ProductHandleRoute
 }
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/policies': typeof PoliciesRoute
   '/women': typeof WomenRoute
   '/shop': typeof AuthenticatedShopRoute
+  '/api/tryon': typeof ApiTryonRoute
   '/journal/$slug': typeof JournalSlugRoute
   '/product/$handle': typeof ProductHandleRoute
 }
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/policies': typeof PoliciesRoute
   '/women': typeof WomenRoute
   '/_authenticated/shop': typeof AuthenticatedShopRoute
+  '/api/tryon': typeof ApiTryonRoute
   '/journal/$slug': typeof JournalSlugRoute
   '/product/$handle': typeof ProductHandleRoute
 }
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/policies'
     | '/women'
     | '/shop'
+    | '/api/tryon'
     | '/journal/$slug'
     | '/product/$handle'
   fileRoutesByTo: FileRoutesByTo
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/policies'
     | '/women'
     | '/shop'
+    | '/api/tryon'
     | '/journal/$slug'
     | '/product/$handle'
   id:
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/policies'
     | '/women'
     | '/_authenticated/shop'
+    | '/api/tryon'
     | '/journal/$slug'
     | '/product/$handle'
   fileRoutesById: FileRoutesById
@@ -163,6 +175,7 @@ export interface RootRouteChildren {
   MenRoute: typeof MenRoute
   PoliciesRoute: typeof PoliciesRoute
   WomenRoute: typeof WomenRoute
+  ApiTryonRoute: typeof ApiTryonRoute
   ProductHandleRoute: typeof ProductHandleRoute
 }
 
@@ -238,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JournalSlugRouteImport
       parentRoute: typeof JournalRoute
     }
+    '/api/tryon': {
+      id: '/api/tryon'
+      path: '/api/tryon'
+      fullPath: '/api/tryon'
+      preLoaderRoute: typeof ApiTryonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/shop': {
       id: '/_authenticated/shop'
       path: '/shop'
@@ -280,6 +300,7 @@ const rootRouteChildren: RootRouteChildren = {
   MenRoute: MenRoute,
   PoliciesRoute: PoliciesRoute,
   WomenRoute: WomenRoute,
+  ApiTryonRoute: ApiTryonRoute,
   ProductHandleRoute: ProductHandleRoute,
 }
 export const routeTree = rootRouteImport
