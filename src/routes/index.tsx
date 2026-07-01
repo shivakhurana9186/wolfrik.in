@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import wolfHero from "@/assets/wolf-hero.jpg";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { AuthPanel } from "@/components/AuthPanel";
+import { ProductCarousel } from "@/components/ProductCarousel";
+import { WolfMark } from "@/components/WolfMark";
 import { useAuth } from "@/hooks/useAuth";
 import { useCartSync } from "@/hooks/useCartSync";
 
@@ -15,8 +16,6 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Sign in to WOLFRIK CO. — dark luxury streetwear for those who walk apart from the pack." },
       { property: "og:title", content: "WOLFRIK CO. — Enter the Pack" },
       { property: "og:description", content: "Wild by Nature. Refined by Choice." },
-      { property: "og:image", content: wolfHero },
-      { property: "twitter:image", content: wolfHero },
     ],
   }),
   component: Landing,
@@ -37,19 +36,21 @@ function Landing() {
     <div className="min-h-screen bg-background text-foreground">
       <Header />
 
-      <section className="relative min-h-[calc(100vh-4rem)] overflow-hidden">
-        <img
-          src={wolfHero}
-          alt="A wolf with amber eyes in deep shadow"
-          className="absolute inset-0 h-full w-full object-cover"
+      {/* Typographic hero — no big wolf image */}
+      <section className="relative overflow-hidden border-b border-border/60">
+        <div
+          className="absolute inset-0 opacity-[0.06] pointer-events-none"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 20% 20%, var(--accent) 0, transparent 40%), radial-gradient(circle at 80% 70%, var(--blood) 0, transparent 45%)",
+          }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30 md:via-background/70 md:to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-
-        <div className="relative z-10 mx-auto grid min-h-[calc(100vh-4rem)] max-w-7xl gap-12 px-6 py-16 md:grid-cols-2 md:items-center md:py-24">
-          {/* Brand pitch */}
+        <div className="relative z-10 mx-auto grid max-w-7xl gap-12 px-6 py-16 md:grid-cols-2 md:items-center md:py-24">
           <div className="max-w-xl">
-            <p className="text-[10px] uppercase tracking-[0.4em] text-accent">WOLFRIK CO.</p>
+            <div className="flex items-center gap-3">
+              <WolfMark className="h-5 w-5 text-accent" />
+              <p className="text-[10px] uppercase tracking-[0.4em] text-accent">WOLFRIK CO.</p>
+            </div>
             <h1 className="mt-6 font-serif text-5xl md:text-6xl lg:text-7xl leading-[0.95] tracking-tight">
               Wild by Nature.
               <br />
@@ -85,7 +86,6 @@ function Landing() {
             </ul>
           </div>
 
-          {/* Auth card */}
           {!user && (
             <div className="md:justify-self-end w-full max-w-md">
               <div className="border border-border/60 bg-background/95 backdrop-blur-md p-8 md:p-10 shadow-2xl">
@@ -124,7 +124,25 @@ function Landing() {
         </div>
       </section>
 
+      {/* Animated product carousel */}
+      <section className="py-20 border-b border-border/60">
+        <div className="mx-auto max-w-7xl px-6 mb-10 flex items-end justify-between">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.35em] text-accent">In Rotation</p>
+            <h2 className="mt-3 font-serif text-3xl md:text-4xl tracking-tight">The Pack</h2>
+          </div>
+          <Link
+            to="/shop"
+            className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground hover:text-accent"
+          >
+            View all →
+          </Link>
+        </div>
+        <ProductCarousel />
+      </section>
+
       <Footer />
     </div>
   );
 }
+
