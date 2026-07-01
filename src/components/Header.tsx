@@ -4,6 +4,7 @@ import { Menu, X, User as UserIcon, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { CartDrawer } from "@/components/CartDrawer";
 import { CurrencySwitcher } from "@/components/CurrencySwitcher";
+import { WolfMark } from "@/components/WolfMark";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -32,7 +33,8 @@ export function Header() {
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
 
-        <Link to="/" className="font-serif text-xl md:text-2xl tracking-[0.2em] uppercase">
+        <Link to="/" className="flex items-center gap-2 font-serif text-xl md:text-2xl tracking-[0.2em] uppercase">
+          <WolfMark className="h-6 w-6 text-accent" />
           Wolfrik<span className="text-accent">.</span>
         </Link>
 

@@ -20,6 +20,8 @@ import {
 import { useCurrency } from "@/lib/currency";
 import { useCartStore } from "@/stores/cartStore";
 import { useCartSync } from "@/hooks/useCartSync";
+import { ReviewSection } from "@/components/ReviewSection";
+import { TryOnPanel } from "@/components/TryOnPanel";
 
 type ProductNode = ShopifyProduct["node"];
 
@@ -216,6 +218,11 @@ function ProductPage() {
                   )}
                 </Button>
 
+                <TryOnPanel
+                  productImage={product.images.edges[0]?.node.url ?? ""}
+                  productTitle={product.title}
+                />
+
                 {product.description && (
                   <div className="mt-10 border-t border-border pt-8">
                     <p className="text-[10px] uppercase tracking-[0.22em] text-accent">
@@ -237,18 +244,10 @@ function ProductPage() {
                     Free returns within 30 days
                   </p>
                 </div>
-
-                {/* Reviews — empty state, no fabricated content */}
-                <div className="mt-10 border-t border-border pt-8">
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-accent">
-                    Reviews
-                  </p>
-                  <p className="mt-3 text-sm text-muted-foreground">
-                    No reviews yet. Be the first to share your experience.
-                  </p>
-                </div>
               </div>
             </div>
+
+            <ReviewSection productHandle={product.handle} />
 
             {/* Related */}
             <section className="mt-32">
