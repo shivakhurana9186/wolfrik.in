@@ -20,6 +20,8 @@ import {
 import { useCurrency } from "@/lib/currency";
 import { useCartStore } from "@/stores/cartStore";
 import { useCartSync } from "@/hooks/useCartSync";
+import { ReviewSection } from "@/components/ReviewSection";
+import { TryOnPanel } from "@/components/TryOnPanel";
 
 type ProductNode = ShopifyProduct["node"];
 
