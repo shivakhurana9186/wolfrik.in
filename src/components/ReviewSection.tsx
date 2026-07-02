@@ -59,46 +59,121 @@ function Stars({ value, onChange, size = 18 }: { value: number; onChange?: (v: n
   );
 }
 
-function MediaThumb({ path }: { path: string }) {
+function MediaThumb({ path, onOpen }: { path: string; onOpen: () => void }) {
   const [url, setUrl] = useState<string>("");
   useEffect(() => {
     getSignedUrl(path).then(setUrl);
   }, [path]);
-  const [open, setOpen] = useState(false);
   if (!url) return <div className="h-20 w-20 bg-muted animate-pulse" />;
   return (
-    <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="relative h-20 w-20 overflow-hidden bg-muted border border-border/50 hover:border-accent transition-colors"
-      >
-        {isVideo(path) ? (
-          <>
-            <video src={url} className="h-full w-full object-cover" muted />
-            <span className="absolute inset-0 flex items-center justify-center bg-black/40">
-              <Play className="h-5 w-5 text-white fill-white" />
-            </span>
-          </>
-        ) : (
-          <img src={url} alt="Review media" className="h-full w-full object-cover" />
-        )}
-      </button>
-      {open && (
-        <div
-          className="fixed inset-0 z-[80] bg-black/90 flex items-center justify-center p-6"
-          onClick={() => setOpen(false)}
-        >
-          {isVideo(path) ? (
-            <video src={url} className="max-h-full max-w-full" controls autoPlay />
-          ) : (
-            <img src={url} alt="" className="max-h-full max-w-full object-contain" />
-          )}
-        </div>
+    <button
+      type="button"
+      onClick={onOpen}
+      className="relative h-20 w-20 overflow-hidden bg-muted border border-border/50 hover:border-accent transition-colors"
+    >
+      {isVideo(path) ? (
+        <>
+          <video src={url} className="h-full w-full object-cover" muted />
+          <span className="absolute inset-0 flex items-center justify-center bg-black/40">
+            <Play className="h-5 w-5 text-white fill-white" />
+          </span>
+        </>
+      ) : (
+        <img src={url} alt="Review media" className="h-full w-full object-cover" />
       )}
-    </>
+    </button>
   );
 }
+
+function MediaLightbox({
+  paths,
+  index,
+  onClose,
+  onIndex,
+}: {
+  paths: string[];
+  index: number;
+  onClose: () => void;
+  onIndex: (i: number) => void;
+}) {
+  const [url, setUrl] = useState<string>("");
+  const path = paths[index];
+  useEffect(() => {
+    getSignedUrl(path).then(setUrl);
+  }, [path]);
+
+  const prev = useCallback(
+    () => onIndex((index - 1 + paths.length) % paths.length),
+    [index, paths.length, onIndex],
+  );
+  const next = useCallback(
+    () => onIndex((index + 1) % paths.length),
+    [index, paths.length, onIndex],
+  );
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowLeft") prev();
+      if (e.key === "ArrowRight") next();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [prev, next, onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[80] bg-black/95 flex items-center justify-center p-6"
+      onClick={onClose}
+    >
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onClose(); }}
+        className="absolute top-4 right-4 h-10 w-10 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full"
+        aria-label="Close"
+      >
+        <X className="h-5 w-5" />
+      </button>
+      {paths.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); prev(); }}
+            className="absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full"
+            aria-label="Previous"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); next(); }}
+            className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full"
+            aria-label="Next"
+          >
+            <ChevronRight className="h-6 w-6" />
+          </button>
+        </>
+      )}
+      <div className="max-h-full max-w-full flex flex-col items-center gap-4" onClick={(e) => e.stopPropagation()}>
+        {url ? (
+          isVideo(path) ? (
+            <video key={path} src={url} className="max-h-[80vh] max-w-full" controls autoPlay />
+          ) : (
+            <img key={path} src={url} alt="" className="max-h-[80vh] max-w-full object-contain" />
+          )
+        ) : (
+          <Loader2 className="h-6 w-6 animate-spin text-white" />
+        )}
+        {paths.length > 1 && (
+          <p className="text-xs uppercase tracking-[0.3em] text-white/60">
+            {index + 1} / {paths.length}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 
 export function ReviewSection({ productHandle }: { productHandle: string }) {
   const { user } = useAuth();
