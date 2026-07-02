@@ -180,6 +180,7 @@ export function ReviewSection({ productHandle }: { productHandle: string }) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [lightbox, setLightbox] = useState<{ paths: string[]; index: number } | null>(null);
 
   useEffect(() => {
     let active = true;
