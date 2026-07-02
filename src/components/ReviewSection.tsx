@@ -268,8 +268,12 @@ export function ReviewSection({ productHandle }: { productHandle: string }) {
               </p>
               {r.media_urls.length > 0 && (
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {r.media_urls.map((p) => (
-                    <MediaThumb key={p} path={p} />
+                  {r.media_urls.map((p, i) => (
+                    <MediaThumb
+                      key={p}
+                      path={p}
+                      onOpen={() => setLightbox({ paths: r.media_urls, index: i })}
+                    />
                   ))}
                 </div>
               )}
@@ -281,6 +285,14 @@ export function ReviewSection({ productHandle }: { productHandle: string }) {
             </li>
           ))}
         </ul>
+      )}
+      {lightbox && (
+        <MediaLightbox
+          paths={lightbox.paths}
+          index={lightbox.index}
+          onClose={() => setLightbox(null)}
+          onIndex={(i) => setLightbox({ paths: lightbox.paths, index: i })}
+        />
       )}
     </section>
   );
