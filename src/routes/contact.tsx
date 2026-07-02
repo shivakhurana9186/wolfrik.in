@@ -110,6 +110,14 @@ function Contact() {
 
         <div className="space-y-10">
           <div>
+            <p className="text-[10px] uppercase tracking-[0.22em] text-accent">Name</p>
+            <p className="mt-2 font-serif text-2xl">Shiva Khurana</p>
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.22em] text-accent">Phone</p>
+            <p className="mt-2 font-serif text-2xl">9105512640</p>
+          </div>
+          <div>
             <p className="text-[10px] uppercase tracking-[0.22em] text-accent">Email</p>
             <p className="mt-2 font-serif text-2xl">hello@wolfrik.co</p>
           </div>
@@ -120,7 +128,7 @@ function Contact() {
           <div>
             <p className="text-[10px] uppercase tracking-[0.22em] text-accent">Social</p>
             <div className="mt-2 flex gap-4 text-sm">
-              <a href="https://instagram.com" target="_blank" rel="noreferrer" className="hover:text-accent">Instagram</a>
+              <a href="https://instagram.com/wolfrik.fashion" target="_blank" rel="noreferrer" className="hover:text-accent">Instagram</a>
               <a href="https://tiktok.com" target="_blank" rel="noreferrer" className="hover:text-accent">TikTok</a>
             </div>
           </div>
