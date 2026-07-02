@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Star, Loader2, ImagePlus, X, Play } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { Star, Loader2, ImagePlus, X, Play, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
