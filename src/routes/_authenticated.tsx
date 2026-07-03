@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
     const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/" });
+    if (error || !data.user) throw redirect({ to: "/auth" });
     return { user: data.user };
   },
   component: AuthenticatedLayout,
@@ -20,7 +20,7 @@ function AuthenticatedLayout() {
 
   useEffect(() => {
     if (!loading && !user) {
-      router.navigate({ to: "/", replace: true });
+      router.navigate({ to: "/auth", replace: true });
     }
   }, [user, loading, router]);
 
