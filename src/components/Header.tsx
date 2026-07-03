@@ -91,7 +91,7 @@ function AuthButton() {
   if (!user) {
     return (
       <Link
-        to="/"
+        to="/auth"
         className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground hover:text-accent transition-colors"
       >
         Sign In
@@ -111,9 +111,13 @@ function AuthButton() {
 
   return (
     <div className="flex items-center gap-2">
-      <div className="hidden sm:flex h-8 w-8 items-center justify-center border border-accent/40 text-[11px] font-medium text-accent" title={user.email ?? user.phone ?? ""}>
+      <Link
+        to="/profile"
+        className="hidden sm:flex h-8 w-8 items-center justify-center border border-accent/40 text-[11px] font-medium text-accent hover:bg-accent hover:text-background transition-colors"
+        title={user.email ?? user.phone ?? ""}
+      >
         {initial}
-      </div>
+      </Link>
       <button
         type="button"
         onClick={signOut}

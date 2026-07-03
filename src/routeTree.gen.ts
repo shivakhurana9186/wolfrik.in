@@ -14,6 +14,7 @@ import { Route as PoliciesRouteImport } from './routes/policies'
 import { Route as MenRouteImport } from './routes/men'
 import { Route as JournalRouteImport } from './routes/journal'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
@@ -21,6 +22,7 @@ import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as JournalSlugRouteImport } from './routes/journal.$slug'
 import { Route as ApiTryonRouteImport } from './routes/api/tryon'
 import { Route as AuthenticatedShopRouteImport } from './routes/_authenticated.shop'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 
 const WomenRoute = WomenRouteImport.update({
   id: '/women',
@@ -45,6 +47,11 @@ const JournalRoute = JournalRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -81,15 +88,22 @@ const AuthenticatedShopRoute = AuthenticatedShopRouteImport.update({
   path: '/shop',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/journal': typeof JournalRouteWithChildren
   '/men': typeof MenRoute
   '/policies': typeof PoliciesRoute
   '/women': typeof WomenRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/shop': typeof AuthenticatedShopRoute
   '/api/tryon': typeof ApiTryonRoute
   '/journal/$slug': typeof JournalSlugRoute
@@ -98,11 +112,13 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/journal': typeof JournalRouteWithChildren
   '/men': typeof MenRoute
   '/policies': typeof PoliciesRoute
   '/women': typeof WomenRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/shop': typeof AuthenticatedShopRoute
   '/api/tryon': typeof ApiTryonRoute
   '/journal/$slug': typeof JournalSlugRoute
@@ -113,11 +129,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
+  '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/journal': typeof JournalRouteWithChildren
   '/men': typeof MenRoute
   '/policies': typeof PoliciesRoute
   '/women': typeof WomenRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/shop': typeof AuthenticatedShopRoute
   '/api/tryon': typeof ApiTryonRoute
   '/journal/$slug': typeof JournalSlugRoute
@@ -128,11 +146,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/auth'
     | '/contact'
     | '/journal'
     | '/men'
     | '/policies'
     | '/women'
+    | '/profile'
     | '/shop'
     | '/api/tryon'
     | '/journal/$slug'
@@ -141,11 +161,13 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/auth'
     | '/contact'
     | '/journal'
     | '/men'
     | '/policies'
     | '/women'
+    | '/profile'
     | '/shop'
     | '/api/tryon'
     | '/journal/$slug'
@@ -155,11 +177,13 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/about'
+    | '/auth'
     | '/contact'
     | '/journal'
     | '/men'
     | '/policies'
     | '/women'
+    | '/_authenticated/profile'
     | '/_authenticated/shop'
     | '/api/tryon'
     | '/journal/$slug'
@@ -170,6 +194,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AboutRoute: typeof AboutRoute
+  AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
   JournalRoute: typeof JournalRouteWithChildren
   MenRoute: typeof MenRoute
@@ -214,6 +239,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -265,14 +297,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedShopRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedShopRoute: typeof AuthenticatedShopRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedShopRoute: AuthenticatedShopRoute,
 }
 
@@ -295,6 +336,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AboutRoute: AboutRoute,
+  AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
   JournalRoute: JournalRouteWithChildren,
   MenRoute: MenRoute,
@@ -306,13 +348,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
