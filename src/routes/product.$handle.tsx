@@ -22,6 +22,7 @@ import { useCartStore } from "@/stores/cartStore";
 import { useCartSync } from "@/hooks/useCartSync";
 import { ReviewSection } from "@/components/ReviewSection";
 import { TryOnPanel } from "@/components/TryOnPanel";
+import { OfferPopup } from "@/components/OfferPopup";
 
 type ProductNode = ShopifyProduct["node"];
 
@@ -75,6 +76,7 @@ function ProductPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
+      <OfferPopup />
       <div className="mx-auto max-w-7xl px-6 py-8">
         <Link
           to="/shop"
