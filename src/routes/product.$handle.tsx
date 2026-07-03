@@ -22,6 +22,7 @@ import { useCartStore } from "@/stores/cartStore";
 import { useCartSync } from "@/hooks/useCartSync";
 import { ReviewSection } from "@/components/ReviewSection";
 import { TryOnPanel } from "@/components/TryOnPanel";
+import { OfferPopup } from "@/components/OfferPopup";
 
 type ProductNode = ShopifyProduct["node"];
 
