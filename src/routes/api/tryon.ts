@@ -11,6 +11,8 @@ async function fetchAsDataUrl(url: string): Promise<string> {
   return `data:${contentType};base64,${b64}`;
 }
 
+type Garment = { image: string; title: string; role: "top" | "bottom" | "full" };
+
 export const Route = createFileRoute("/api/tryon")({
   server: {
     handlers: {
@@ -18,18 +20,46 @@ export const Route = createFileRoute("/api/tryon")({
         const key = process.env.LOVABLE_API_KEY;
         if (!key) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
 
-        const { userPhoto, productImage, productTitle } = (await request.json()) as {
-          userPhoto: string; // data URL
-          productImage: string; // http URL
-          productTitle: string;
+        const body = (await request.json()) as {
+          userPhoto: string;
+          garments?: Garment[];
+          // legacy fallback
+          productImage?: string;
+          productTitle?: string;
         };
-        if (!userPhoto || !productImage) {
+
+        const garments: Garment[] =
+          body.garments && body.garments.length
+            ? body.garments
+            : body.productImage
+              ? [{ image: body.productImage, title: body.productTitle ?? "garment", role: "top" }]
+              : [];
+
+        if (!body.userPhoto || garments.length === 0) {
           return new Response("Missing images", { status: 400 });
         }
 
-        const productDataUrl = productImage.startsWith("data:")
-          ? productImage
-          : await fetchAsDataUrl(productImage);
+        const garmentDataUrls = await Promise.all(
+          garments.map(async (g) => ({
+            ...g,
+            image: g.image.startsWith("data:") ? g.image : await fetchAsDataUrl(g.image),
+          })),
+        );
+
+        const outfitDesc = garmentDataUrls
+          .map((g) => `${g.role === "top" ? "top" : g.role === "bottom" ? "bottom" : "full outfit"}: "${g.title}"`)
+          .join(", ");
+
+        const content: Array<{ type: string; text?: string; image_url?: { url: string } }> = [
+          {
+            type: "text",
+            text: `Create a photorealistic full-body virtual try-on. Take the person from the first image and generate a realistic model mockup of them wearing the following pieces together as a complete outfit — ${outfitDesc}. Preserve the person's face, skin tone, hair, and body proportions exactly. Match each garment's color, fabric, cut, and details precisely from its reference image. Show the full outfit from head to toe, natural pose, editorial fashion photography, studio lighting, dark neutral background.`,
+          },
+          { type: "image_url", image_url: { url: body.userPhoto } },
+        ];
+        for (const g of garmentDataUrls) {
+          content.push({ type: "image_url", image_url: { url: g.image } });
+        }
 
         const upstream = await fetch(
           "https://ai.gateway.lovable.dev/v1/images/generations",
@@ -41,19 +71,7 @@ export const Route = createFileRoute("/api/tryon")({
             },
             body: JSON.stringify({
               model: "google/gemini-3.1-flash-image",
-              messages: [
-                {
-                  role: "user",
-                  content: [
-                    {
-                      type: "text",
-                      text: `Create a photorealistic virtual try-on image. Take the person from the first image and show them naturally wearing the garment from the second image ("${productTitle}"). Preserve the person's face, skin tone, hair, and body proportions exactly. Match the garment's color, fabric, cut, and details precisely. Studio lighting, editorial fashion photography, dark neutral background.`,
-                    },
-                    { type: "image_url", image_url: { url: userPhoto } },
-                    { type: "image_url", image_url: { url: productDataUrl } },
-                  ],
-                },
-              ],
+              messages: [{ role: "user", content }],
               modalities: ["image", "text"],
               stream: true,
             }),
