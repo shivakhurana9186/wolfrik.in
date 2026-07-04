@@ -2,24 +2,46 @@ import { useEffect, useState } from "react";
 import { ProductCard } from "@/components/ProductCard";
 import { PRODUCTS_QUERY, storefrontApiRequest, type ShopifyProduct } from "@/lib/shopify";
 
-export function ProductGrid({ query = null, limit = 24 }: { query?: string | null; limit?: number }) {
-  const [products, setProducts] = useState<ShopifyProduct[] | null>(null);
+export function ProductGrid({
+  query = null,
+  limit = 24,
+  size = null,
+}: {
+  query?: string | null;
+  limit?: number;
+  size?: string | null;
+}) {
+  const [all, setAll] = useState<ShopifyProduct[] | null>(null);
 
   useEffect(() => {
     let active = true;
     storefrontApiRequest(PRODUCTS_QUERY, { first: limit, query })
       .then((data) => {
         if (!active) return;
-        setProducts(data?.data?.products?.edges ?? []);
+        setAll(data?.data?.products?.edges ?? []);
       })
       .catch((e) => {
         console.error(e);
-        if (active) setProducts([]);
+        if (active) setAll([]);
       });
     return () => {
       active = false;
     };
   }, [query, limit]);
+
+  const products =
+    all && size
+      ? all.filter((p) =>
+          p.node.variants.edges.some((v) =>
+            v.node.selectedOptions.some(
+              (o) =>
+                o.name.toLowerCase() === "size" &&
+                o.value.toLowerCase() === size.toLowerCase() &&
+                v.node.availableForSale,
+            ),
+          ),
+        )
+      : all;
 
   if (products === null) {
     return (
