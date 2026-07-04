@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { Sparkles, Camera, Upload, Loader2, X, Download, Move, ZoomIn, ZoomOut } from "lucide-react";
+import { Sparkles, Camera, Upload, Loader2, X, Download, Shirt, Check } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +10,21 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  PRODUCTS_QUERY,
+  storefrontApiRequest,
+  type ShopifyProduct,
+} from "@/lib/shopify";
+
+type Role = "top" | "bottom" | "full";
+type Garment = { image: string; title: string; role: Role };
+
+function guessRole(title: string): Role {
+  const t = title.toLowerCase();
+  if (/(dress|jumpsuit|romper|gown|coord|set)/.test(t)) return "full";
+  if (/(pant|trouser|jean|short|skirt|legging|cargo|chino|joggers?)/.test(t)) return "bottom";
+  return "top";
+}
 
 export function TryOnPanel({
   productImage,
@@ -33,10 +48,10 @@ export function TryOnPanel({
       </DialogTrigger>
       <DialogContent className="max-w-3xl max-h-[92vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl">Live Try-On Mockup</DialogTitle>
+          <DialogTitle className="font-serif text-2xl">Full-Look Try-On</DialogTitle>
           <p className="text-xs text-muted-foreground mt-1">
-            See how <span className="text-foreground">{productTitle}</span> looks on you before
-            you order. Your photo stays private.
+            Upload your photo and pick a top and bottom. Our AI generates a photorealistic
+            model mockup of you wearing the full outfit. Your photo stays private.
           </p>
         </DialogHeader>
         <TryOnBody productImage={productImage} productTitle={productTitle} />
@@ -45,8 +60,6 @@ export function TryOnPanel({
   );
 }
 
-type Mode = "pick" | "overlay" | "ai";
-
 function TryOnBody({
   productImage,
   productTitle,
@@ -54,8 +67,12 @@ function TryOnBody({
   productImage: string;
   productTitle: string;
 }) {
-  const [mode, setMode] = useState<Mode>("pick");
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
+  const initialRole = guessRole(productTitle);
+  const [garments, setGarments] = useState<Garment[]>([
+    { image: productImage, title: productTitle, role: initialRole },
+  ]);
+  const [started, setStarted] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
 
@@ -70,218 +87,272 @@ function TryOnBody({
     reader.readAsDataURL(f);
   };
 
-  if (!userPhoto) {
-    return (
-      <div className="mt-6">
-        <div className="border border-dashed border-border/60 p-10 text-center">
-          <Camera className="h-8 w-8 mx-auto text-accent" />
-          <p className="mt-4 font-serif text-lg">We need a photo of you</p>
-          <p className="mt-1 text-sm text-muted-foreground max-w-sm mx-auto">
-            Full-body or upper-body works best. Your photo is only used to create the mockup
-            — it is not saved on our servers.
-          </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Button
-              onClick={() => cameraRef.current?.click()}
-              className="rounded-none uppercase tracking-[0.22em] text-xs"
-            >
-              <Camera className="h-3.5 w-3.5 mr-2" />
-              Take photo
-            </Button>
-            <Button
-              onClick={() => fileRef.current?.click()}
-              variant="outline"
-              className="rounded-none uppercase tracking-[0.22em] text-xs"
-            >
-              <Upload className="h-3.5 w-3.5 mr-2" />
-              Upload photo
-            </Button>
-          </div>
-          <input
-            ref={cameraRef}
-            type="file"
-            accept="image/*"
-            capture="user"
-            className="hidden"
-            onChange={(e) => handleFile(e.target.files?.[0])}
-          />
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => handleFile(e.target.files?.[0])}
-          />
-        </div>
-      </div>
-    );
-  }
+  const setGarment = (role: Role, g: { image: string; title: string } | null) => {
+    setGarments((prev) => {
+      const others = prev.filter((x) => x.role !== role);
+      if (!g) return others;
+      return [...others, { ...g, role }];
+    });
+  };
 
-  if (mode === "pick") {
-    return (
-      <div className="mt-6">
-        <div className="grid md:grid-cols-2 gap-4">
-          <button
-            onClick={() => setMode("overlay")}
-            className="text-left border border-border/60 p-5 hover:border-accent transition-colors group"
-          >
-            <Move className="h-5 w-5 text-accent" />
-            <p className="mt-3 font-serif text-lg">Instant Overlay</p>
-            <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-              Position and resize the garment on your photo yourself. Fast, no waiting.
-            </p>
-          </button>
-          <button
-            onClick={() => setMode("ai")}
-            className="text-left border border-border/60 p-5 hover:border-accent transition-colors group"
-          >
-            <Sparkles className="h-5 w-5 text-accent" />
-            <p className="mt-3 font-serif text-lg">AI Try-On</p>
-            <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-              AI generates a realistic image of you actually wearing this piece. Takes ~20s.
-            </p>
-          </button>
-        </div>
-        <button
-          onClick={() => setUserPhoto(null)}
-          className="mt-4 text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-accent"
-        >
-          Use a different photo
-        </button>
-      </div>
-    );
-  }
+  const hasTop = garments.some((g) => g.role === "top");
+  const hasBottom = garments.some((g) => g.role === "bottom");
+  const hasFull = garments.some((g) => g.role === "full");
+  const canGenerate = userPhoto && (hasFull || hasTop || hasBottom);
 
-  if (mode === "overlay") {
+  if (started && userPhoto) {
     return (
-      <OverlayEditor
+      <AiTryOn
         userPhoto={userPhoto}
-        productImage={productImage}
-        onBack={() => setMode("pick")}
+        garments={garments}
+        onBack={() => setStarted(false)}
       />
     );
   }
 
   return (
-    <AiTryOn
-      userPhoto={userPhoto}
-      productImage={productImage}
-      productTitle={productTitle}
-      onBack={() => setMode("pick")}
-    />
+    <div className="mt-6 space-y-8">
+      {/* Step 1: user photo */}
+      <div>
+        <p className="text-[10px] uppercase tracking-[0.22em] text-accent">Step 1</p>
+        <p className="mt-1 font-serif text-lg">Your photo</p>
+        {userPhoto ? (
+          <div className="mt-3 flex items-center gap-4">
+            <img src={userPhoto} alt="You" className="h-24 w-20 object-cover" />
+            <Button
+              variant="ghost"
+              onClick={() => setUserPhoto(null)}
+              className="rounded-none uppercase tracking-[0.22em] text-[10px]"
+            >
+              Change
+            </Button>
+          </div>
+        ) : (
+          <div className="mt-3 border border-dashed border-border/60 p-6 text-center">
+            <Camera className="h-6 w-6 mx-auto text-accent" />
+            <p className="mt-2 text-xs text-muted-foreground">
+              Full-body works best. Not saved on our servers.
+            </p>
+            <div className="mt-4 flex flex-wrap justify-center gap-3">
+              <Button
+                onClick={() => cameraRef.current?.click()}
+                className="rounded-none uppercase tracking-[0.22em] text-xs"
+              >
+                <Camera className="h-3.5 w-3.5 mr-2" />
+                Take photo
+              </Button>
+              <Button
+                onClick={() => fileRef.current?.click()}
+                variant="outline"
+                className="rounded-none uppercase tracking-[0.22em] text-xs"
+              >
+                <Upload className="h-3.5 w-3.5 mr-2" />
+                Upload
+              </Button>
+            </div>
+            <input
+              ref={cameraRef}
+              type="file"
+              accept="image/*"
+              capture="user"
+              className="hidden"
+              onChange={(e) => handleFile(e.target.files?.[0])}
+            />
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handleFile(e.target.files?.[0])}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Step 2: outfit */}
+      <div>
+        <p className="text-[10px] uppercase tracking-[0.22em] text-accent">Step 2</p>
+        <p className="mt-1 font-serif text-lg">Build the outfit</p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Pick a top and a bottom, or a full-body piece like a dress.
+        </p>
+
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <GarmentSlot
+            role="top"
+            label="Top"
+            selected={garments.find((g) => g.role === "top") ?? null}
+            onSelect={(g) => setGarment("top", g)}
+            disabled={hasFull}
+          />
+          <GarmentSlot
+            role="bottom"
+            label="Bottom"
+            selected={garments.find((g) => g.role === "bottom") ?? null}
+            onSelect={(g) => setGarment("bottom", g)}
+            disabled={hasFull}
+          />
+        </div>
+
+        <div className="mt-3">
+          <GarmentSlot
+            role="full"
+            label="Or a full-body piece (dress / jumpsuit)"
+            selected={garments.find((g) => g.role === "full") ?? null}
+            onSelect={(g) => setGarment("full", g)}
+            disabled={hasTop || hasBottom}
+          />
+        </div>
+      </div>
+
+      <Button
+        disabled={!canGenerate}
+        onClick={() => setStarted(true)}
+        size="lg"
+        className="w-full rounded-none uppercase tracking-[0.22em] text-xs"
+      >
+        <Sparkles className="h-3.5 w-3.5 mr-2" />
+        Generate my model shot
+      </Button>
+    </div>
   );
 }
 
-function OverlayEditor({
-  userPhoto,
-  productImage,
-  onBack,
+function GarmentSlot({
+  label,
+  selected,
+  onSelect,
+  disabled,
 }: {
-  userPhoto: string;
-  productImage: string;
-  onBack: () => void;
+  role: Role;
+  label: string;
+  selected: { image: string; title: string } | null;
+  onSelect: (g: { image: string; title: string } | null) => void;
+  disabled?: boolean;
 }) {
-  const [scale, setScale] = useState(0.5);
-  const [pos, setPos] = useState({ x: 50, y: 55 }); // percent
-  const [opacity, setOpacity] = useState(0.9);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const dragging = useRef(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  return (
+    <div>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setPickerOpen(true)}
+        className={`w-full border p-3 flex items-center gap-3 text-left transition-colors ${
+          selected ? "border-accent" : "border-border hover:border-accent"
+        } disabled:opacity-40 disabled:cursor-not-allowed`}
+      >
+        <div className="h-14 w-14 bg-muted flex items-center justify-center overflow-hidden shrink-0">
+          {selected ? (
+            <img src={selected.image} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <Shirt className="h-5 w-5 text-muted-foreground" />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            {label}
+          </p>
+          <p className="text-xs truncate">
+            {selected ? selected.title : "Choose piece"}
+          </p>
+        </div>
+        {selected && (
+          <span
+            role="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect(null);
+            }}
+            className="text-muted-foreground hover:text-accent"
+          >
+            <X className="h-4 w-4" />
+          </span>
+        )}
+      </button>
 
-  const onPointerDown = (e: React.PointerEvent) => {
-    dragging.current = true;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  };
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (!dragging.current || !containerRef.current) return;
-    const r = containerRef.current.getBoundingClientRect();
-    setPos({
-      x: Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100)),
-      y: Math.max(0, Math.min(100, ((e.clientY - r.top) / r.height) * 100)),
-    });
-  };
-  const onPointerUp = () => {
-    dragging.current = false;
-  };
+      <GarmentPicker
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        onPick={(g) => {
+          onSelect(g);
+          setPickerOpen(false);
+        }}
+        title={`Pick a ${label.toLowerCase()}`}
+      />
+    </div>
+  );
+}
+
+function GarmentPicker({
+  open,
+  onOpenChange,
+  onPick,
+  title,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  onPick: (g: { image: string; title: string }) => void;
+  title: string;
+}) {
+  const [products, setProducts] = useState<ShopifyProduct[] | null>(null);
+
+  useEffect(() => {
+    if (!open || products !== null) return;
+    storefrontApiRequest(PRODUCTS_QUERY, { first: 40, query: null })
+      .then((data) => setProducts(data?.data?.products?.edges ?? []))
+      .catch(() => setProducts([]));
+  }, [open, products]);
 
   return (
-    <div className="mt-6">
-      <div
-        ref={containerRef}
-        className="relative aspect-[3/4] bg-muted overflow-hidden select-none"
-      >
-        <img src={userPhoto} alt="You" className="h-full w-full object-cover" />
-        <img
-          src={productImage}
-          alt=""
-          draggable={false}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          className="absolute cursor-grab active:cursor-grabbing"
-          style={{
-            left: `${pos.x}%`,
-            top: `${pos.y}%`,
-            transform: `translate(-50%, -50%) scale(${scale})`,
-            transformOrigin: "center",
-            width: "60%",
-            opacity,
-            mixBlendMode: "multiply",
-            filter: "contrast(1.05)",
-          }}
-        />
-      </div>
-      <div className="mt-4 space-y-3">
-        <div className="flex items-center gap-3">
-          <ZoomOut className="h-4 w-4 text-muted-foreground" />
-          <input
-            type="range"
-            min={0.2}
-            max={1.2}
-            step={0.01}
-            value={scale}
-            onChange={(e) => setScale(parseFloat(e.target.value))}
-            className="flex-1 accent-[color:var(--accent)]"
-          />
-          <ZoomIn className="h-4 w-4 text-muted-foreground" />
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground w-16">Blend</span>
-          <input
-            type="range"
-            min={0.3}
-            max={1}
-            step={0.01}
-            value={opacity}
-            onChange={(e) => setOpacity(parseFloat(e.target.value))}
-            className="flex-1 accent-[color:var(--accent)]"
-          />
-        </div>
-      </div>
-      <div className="mt-6 flex justify-between">
-        <Button
-          onClick={onBack}
-          variant="ghost"
-          className="rounded-none uppercase tracking-[0.22em] text-xs"
-        >
-          Back
-        </Button>
-        <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground self-center">
-          Drag the garment to reposition
-        </p>
-      </div>
-    </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="font-serif text-xl">{title}</DialogTitle>
+        </DialogHeader>
+        {products === null ? (
+          <div className="py-16 flex justify-center">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : products.length === 0 ? (
+          <p className="py-10 text-center text-sm text-muted-foreground">
+            No products available.
+          </p>
+        ) : (
+          <div className="mt-2 grid grid-cols-3 gap-3">
+            {products.map((p) => {
+              const img = p.node.images.edges[0]?.node.url;
+              if (!img) return null;
+              return (
+                <button
+                  key={p.node.id}
+                  onClick={() => onPick({ image: img, title: p.node.title })}
+                  className="text-left group"
+                >
+                  <div className="aspect-[3/4] bg-muted overflow-hidden">
+                    <img
+                      src={img}
+                      alt={p.node.title}
+                      className="h-full w-full object-cover group-hover:scale-105 transition-transform"
+                    />
+                  </div>
+                  <p className="mt-2 text-xs truncate">{p.node.title}</p>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
 function AiTryOn({
   userPhoto,
-  productImage,
-  productTitle,
+  garments,
   onBack,
 }: {
   userPhoto: string;
-  productImage: string;
-  productTitle: string;
+  garments: Garment[];
   onBack: () => void;
 }) {
   const [image, setImage] = useState<string | null>(null);
@@ -303,7 +374,7 @@ function AiTryOn({
       const res = await fetch("/api/tryon", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userPhoto, productImage, productTitle }),
+        body: JSON.stringify({ userPhoto, garments }),
       });
       if (!res.ok || !res.body) {
         throw new Error(`Try-on failed: ${res.status}`);
@@ -359,6 +430,17 @@ function AiTryOn({
 
   return (
     <div className="mt-6">
+      <div className="flex flex-wrap gap-2 mb-3">
+        {garments.map((g) => (
+          <span
+            key={g.role}
+            className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-muted-foreground border border-border px-2 py-1"
+          >
+            <Check className="h-3 w-3 text-accent" />
+            {g.role}: {g.title}
+          </span>
+        ))}
+      </div>
       <div className="relative aspect-[3/4] bg-muted overflow-hidden">
         {image ? (
           <img
@@ -373,7 +455,7 @@ function AiTryOn({
               <div className="text-center">
                 <Loader2 className="h-6 w-6 animate-spin text-accent mx-auto" />
                 <p className="mt-3 text-xs uppercase tracking-[0.22em] text-muted-foreground">
-                  Generating your look…
+                  Styling your look…
                 </p>
               </div>
             ) : error ? (
