@@ -62,13 +62,30 @@ function Landing() {
             </p>
 
             {user && !loading && (
-              <div className="mt-10 flex flex-wrap gap-3">
-                <Button asChild size="lg" className="rounded-none uppercase tracking-[0.22em] text-xs">
-                  <Link to="/shop">Enter the Shop</Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="rounded-none border-foreground/40 uppercase tracking-[0.22em] text-xs hover:bg-foreground hover:text-background">
-                  <Link to="/men">Alpha</Link>
-                </Button>
+              <div className="mt-10 space-y-4">
+                <div className="flex flex-wrap gap-3">
+                  <Button asChild size="lg" className="rounded-none uppercase tracking-[0.22em] text-xs">
+                    <Link to="/shop">Enter the Shop</Link>
+                  </Button>
+                  <Button asChild size="lg" variant="outline" className="rounded-none border-foreground/40 uppercase tracking-[0.22em] text-xs hover:bg-foreground hover:text-background">
+                    <Link to="/men">Alpha</Link>
+                  </Button>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mr-1">
+                    Shop by size
+                  </span>
+                  {["All", "XS", "S", "M", "L", "XL"].map((s) => (
+                    <Link
+                      key={s}
+                      to="/shop"
+                      search={s === "All" ? {} : { size: s }}
+                      className="min-w-[2.25rem] px-3 py-1.5 border border-border text-[11px] uppercase tracking-[0.22em] text-muted-foreground hover:border-accent hover:text-accent transition-colors text-center"
+                    >
+                      {s}
+                    </Link>
+                  ))}
+                </div>
               </div>
             )}
 
