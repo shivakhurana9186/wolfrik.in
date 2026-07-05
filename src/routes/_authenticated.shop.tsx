@@ -60,7 +60,7 @@ function ShopAll() {
         </div>
       </section>
       <section className="mx-auto max-w-7xl px-6 pb-24 pt-6">
-        <ProductGrid limit={48} size={size ?? null} />
+        <ProductGrid limit={48} size={size ?? null} groupAlphabetical />
       </section>
       <Footer />
     </div>
