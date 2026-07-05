@@ -116,3 +116,14 @@
   to { transform: translateX(-50%); }
 }
 
+
+@keyframes buy-swap-a {
+  0%, 45% { transform: translateY(0); opacity: 1; }
+  50%, 95% { transform: translateY(-100%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes buy-swap-b {
+  0%, 45% { transform: translateY(100%); opacity: 0; }
+  50%, 95% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
