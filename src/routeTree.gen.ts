@@ -18,6 +18,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as Char126oauthCallbackRouteImport } from './routes/~oauth.callback'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as JournalSlugRouteImport } from './routes/journal.$slug'
 import { Route as ApiTryonRouteImport } from './routes/api/tryon'
@@ -68,6 +69,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char126oauthCallbackRoute = Char126oauthCallbackRouteImport.update({
+  id: '/~oauth/callback',
+  path: '/~oauth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductHandleRoute = ProductHandleRouteImport.update({
   id: '/product/$handle',
   path: '/product/$handle',
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/api/tryon': typeof ApiTryonRoute
   '/journal/$slug': typeof JournalSlugRoute
   '/product/$handle': typeof ProductHandleRoute
+  '/~oauth/callback': typeof Char126oauthCallbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/api/tryon': typeof ApiTryonRoute
   '/journal/$slug': typeof JournalSlugRoute
   '/product/$handle': typeof ProductHandleRoute
+  '/~oauth/callback': typeof Char126oauthCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/api/tryon': typeof ApiTryonRoute
   '/journal/$slug': typeof JournalSlugRoute
   '/product/$handle': typeof ProductHandleRoute
+  '/~oauth/callback': typeof Char126oauthCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/api/tryon'
     | '/journal/$slug'
     | '/product/$handle'
+    | '/~oauth/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/api/tryon'
     | '/journal/$slug'
     | '/product/$handle'
+    | '/~oauth/callback'
   id:
     | '__root__'
     | '/'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/api/tryon'
     | '/journal/$slug'
     | '/product/$handle'
+    | '/~oauth/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -202,6 +214,7 @@ export interface RootRouteChildren {
   WomenRoute: typeof WomenRoute
   ApiTryonRoute: typeof ApiTryonRoute
   ProductHandleRoute: typeof ProductHandleRoute
+  Char126oauthCallbackRoute: typeof Char126oauthCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -267,6 +280,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/~oauth/callback': {
+      id: '/~oauth/callback'
+      path: '/~oauth/callback'
+      fullPath: '/~oauth/callback'
+      preLoaderRoute: typeof Char126oauthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/product/$handle': {
@@ -344,6 +364,7 @@ const rootRouteChildren: RootRouteChildren = {
   WomenRoute: WomenRoute,
   ApiTryonRoute: ApiTryonRoute,
   ProductHandleRoute: ProductHandleRoute,
+  Char126oauthCallbackRoute: Char126oauthCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
