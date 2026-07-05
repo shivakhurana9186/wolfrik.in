@@ -220,6 +220,24 @@ function ProductPage() {
                   )}
                 </Button>
 
+                <button
+                  onClick={async () => {
+                    await handleAdd();
+                    const url = useCartStore.getState().getCheckoutUrl();
+                    if (url) window.open(url, "_blank");
+                  }}
+                  disabled={isLoading || !variant?.availableForSale}
+                  className="relative mt-3 h-11 w-full overflow-hidden border border-accent bg-accent text-accent-foreground uppercase tracking-[0.22em] text-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <span className="absolute inset-0 flex items-center justify-center animate-[buy-swap-a_3s_ease-in-out_infinite]">
+                    Buy Now
+                  </span>
+                  <span className="absolute inset-0 flex items-center justify-center animate-[buy-swap-b_3s_ease-in-out_infinite]">
+                    Instant Checkout →
+                  </span>
+                </button>
+
+
                 <TryOnPanel
                   productImage={product.images.edges[0]?.node.url ?? ""}
                   productTitle={product.title}
