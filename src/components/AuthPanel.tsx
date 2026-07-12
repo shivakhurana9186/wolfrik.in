@@ -69,7 +69,8 @@ const localPhoneSchema = z
 
 type Mode = "signin" | "signup";
 
-export function AuthPanel({ onAuthed }: { onAuthed?: () => void }) {
+export function AuthPanel({ onAuthed, redirectTo }: { onAuthed?: () => void; redirectTo?: string }) {
+  const oauthRedirect = redirectTo ?? (typeof window !== "undefined" ? window.location.origin : "/");
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -98,7 +99,7 @@ export function AuthPanel({ onAuthed }: { onAuthed?: () => void }) {
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: oauthRedirect,
             data: { display_name: name || undefined },
           },
         });
@@ -163,7 +164,7 @@ export function AuthPanel({ onAuthed }: { onAuthed?: () => void }) {
     setBusy(true);
     try {
       const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: window.location.origin,
+        redirect_uri: oauthRedirect,
       });
       if (result.error) {
         toast.error(result.error.message ?? "Sign-in failed");

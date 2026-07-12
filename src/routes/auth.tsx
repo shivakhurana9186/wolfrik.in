@@ -6,7 +6,17 @@ import { AuthPanel } from "@/components/AuthPanel";
 import { WolfMark } from "@/components/WolfMark";
 import { useAuth } from "@/hooks/useAuth";
 
+function safeNext(next: string | undefined): string {
+  if (!next) return "/shop";
+  // only allow same-origin relative paths
+  if (!next.startsWith("/") || next.startsWith("//")) return "/shop";
+  return next;
+}
+
 export const Route = createFileRoute("/auth")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    next: typeof s.next === "string" ? s.next : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Enter the Pack — WOLFRIK CO." },
@@ -21,12 +31,23 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
+  const target = safeNext(next);
 
   useEffect(() => {
     if (!loading && user) {
-      navigate({ to: "/shop", replace: true });
+      if (target.startsWith("/.lovable")) {
+        window.location.href = target;
+      } else {
+        navigate({ to: target, replace: true });
+      }
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, target]);
+
+  const redirectTo =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/auth?next=${encodeURIComponent(target)}`
+      : undefined;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -39,7 +60,16 @@ function AuthPage() {
           Sign in or create your account to unlock early drops and member pricing.
         </p>
         <div className="mt-8 w-full">
-          <AuthPanel onAuthed={() => navigate({ to: "/shop", replace: true })} />
+          <AuthPanel
+            redirectTo={redirectTo}
+            onAuthed={() => {
+              if (target.startsWith("/.lovable")) {
+                window.location.href = target;
+              } else {
+                navigate({ to: target, replace: true });
+              }
+            }}
+          />
         </div>
       </div>
       <Footer />
