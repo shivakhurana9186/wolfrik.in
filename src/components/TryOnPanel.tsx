@@ -15,6 +15,7 @@ import {
   storefrontApiRequest,
   type ShopifyProduct,
 } from "@/lib/shopify";
+import { supabase } from "@/integrations/supabase/client";
 
 type Role = "top" | "bottom" | "full";
 type Garment = { image: string; title: string; role: Role };
