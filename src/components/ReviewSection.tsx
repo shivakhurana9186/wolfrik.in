@@ -13,7 +13,7 @@ interface Review {
   product_handle: string;
   user_id: string;
   author_name: string;
-  author_email: string | null;
+  
   rating: number;
   title: string | null;
   body: string;
