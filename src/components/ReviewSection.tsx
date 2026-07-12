@@ -13,7 +13,7 @@ interface Review {
   product_handle: string;
   user_id: string;
   author_name: string;
-  author_email: string | null;
+  
   rating: number;
   title: string | null;
   body: string;
@@ -279,7 +279,7 @@ export function ReviewSection({ productHandle }: { productHandle: string }) {
               )}
               <div className="mt-4 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
                 <span className="text-foreground">{r.author_name}</span>
-                {r.author_email && <span> · {r.author_email}</span>}
+                
                 <span> · {new Date(r.created_at).toLocaleDateString()}</span>
               </div>
             </li>
@@ -346,7 +346,7 @@ function ReviewForm({
           product_handle: productHandle,
           user_id: user.id,
           author_name: name.trim(),
-          author_email: email.trim() || null,
+          
           rating,
           title: title.trim() || null,
           body: body.trim(),
