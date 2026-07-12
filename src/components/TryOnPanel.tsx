@@ -372,9 +372,17 @@ function AiTryOn({
     setImage(null);
     setIsFinal(false);
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) {
+        throw new Error("Please sign in to use Try-On.");
+      }
       const res = await fetch("/api/tryon", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ userPhoto, garments }),
       });
       if (!res.ok || !res.body) {
