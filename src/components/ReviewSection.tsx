@@ -346,7 +346,7 @@ function ReviewForm({
           product_handle: productHandle,
           user_id: user.id,
           author_name: name.trim(),
-          author_email: email.trim() || null,
+          
           rating,
           title: title.trim() || null,
           body: body.trim(),
