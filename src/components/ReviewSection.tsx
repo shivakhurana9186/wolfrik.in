@@ -279,7 +279,7 @@ export function ReviewSection({ productHandle }: { productHandle: string }) {
               )}
               <div className="mt-4 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
                 <span className="text-foreground">{r.author_name}</span>
-                {r.author_email && <span> · {r.author_email}</span>}
+                
                 <span> · {new Date(r.created_at).toLocaleDateString()}</span>
               </div>
             </li>
